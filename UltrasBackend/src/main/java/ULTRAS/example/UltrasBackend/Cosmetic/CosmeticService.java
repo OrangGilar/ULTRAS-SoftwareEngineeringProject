@@ -1,5 +1,6 @@
 package ULTRAS.example.UltrasBackend.Cosmetic;
 
+import ULTRAS.example.UltrasBackend.Engagement.EngagementService;
 import ULTRAS.example.UltrasBackend.User.UserCosmetic;
 import ULTRAS.example.UltrasBackend.User.UserCosmeticRepository;
 import ULTRAS.example.UltrasBackend.User.User;
@@ -29,7 +30,7 @@ public class CosmeticService {
 
     // Get all cosmetics a user owns
     public List<UserCosmetic> getUserCollection(UUID userId) {
-        return userCosmeticRepo.findByUserId(userId);
+        return userCosmeticRepo.findByUserId(String.valueOf(userId));
     }
 
     // Spend XP to unlock a cosmetic
