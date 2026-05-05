@@ -1,0 +1,153 @@
+@import "tailwindcss";
+
+@theme {
+  /*
+   * Tinted neutrals: every "black" and "white" carries a whisper of scarlet
+   * (chroma 0.005-0.012 at hue 25) so the surface never reads as flat
+   * training-data #000/#fff. Read as black/white at a glance, breathes
+   * scarlet up close.
+   */
+  --color-bg: oklch(0.14 0.008 25);
+  --color-surface: oklch(0.19 0.010 25);
+  --color-surface-2: oklch(0.22 0.011 25);
+  --color-surface-3: oklch(0.26 0.011 25);
+  --color-line: oklch(0.30 0.012 25);
+  --color-line-strong: oklch(0.55 0.014 25);
+
+  --color-text: oklch(0.97 0.005 25);
+  --color-text-muted: oklch(0.74 0.010 25);
+  --color-text-faint: oklch(0.55 0.012 25);
+
+  /* Scarlet Flash from DESIGN.md. The single accent. No yellow, no soft
+   * variants, no gradients. */
+  --color-primary: #ff1841;
+  --color-primary-soft: rgba(255, 24, 65, 0.14);
+  --color-crimson-link: #7b0016;
+
+  /* "accent" formerly meant saffron yellow; remapped to a faint warm-white
+   * so legacy callers (badges, scores, points) inherit as high-contrast
+   * monochrome emphasis instead of bringing yellow back. Scarlet remains
+   * reserved for CTAs and live state. */
+  --color-accent: oklch(0.94 0.02 60);
+
+  --color-success: oklch(0.74 0.18 145);
+  --color-danger: #ff1841;
+  --color-info: oklch(0.74 0.14 240);
+
+  --color-pure-white: oklch(0.97 0.005 25);
+  --color-pitch-black: oklch(0.14 0.008 25);
+
+  /* Sharp inputs, pill buttons, mild on misc. */
+  --radius-input: 0px;
+  --radius-misc: 12px;
+  --radius-pill: 999px;
+
+  /* Legacy token aliases kept so feature pages inherit cleanly. */
+  --radius-sm: 2px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 12px;
+
+  --font-display: "Inter", "Helvetica Neue", system-ui, sans-serif;
+  --font-mono: "Roboto Mono", ui-monospace, "Menlo", monospace;
+}
+
+:root {
+  color-scheme: dark;
+}
+
+html,
+body {
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-family: "Helvetica Neue", "Helvetica", "Arial", system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+button {
+  cursor: pointer;
+}
+
+button:disabled {
+  cursor: not-allowed;
+}
+
+@utility scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+@utility pb-safe {
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+@utility font-display {
+  font-family: var(--font-display);
+  letter-spacing: -0.02em;
+  font-weight: 700;
+}
+
+@utility font-mono-label {
+  font-family: var(--font-mono);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+@utility prose-line {
+  max-width: 65ch;
+}
+
+@keyframes ultras-confetti {
+  0% {
+    transform: translate(0, 0) rotate(0deg);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(var(--cx, 0), var(--cy, -160px)) rotate(720deg);
+    opacity: 0;
+  }
+}
+
+@keyframes ultras-shake {
+  0%, 100% { transform: translateX(0); }
+  20% { transform: translateX(-4px); }
+  40% { transform: translateX(4px); }
+  60% { transform: translateX(-3px); }
+  80% { transform: translateX(3px); }
+}
+
+@keyframes ultras-pulse-ring {
+  0% { box-shadow: 0 0 0 0 rgba(255, 24, 65, 0.55); }
+  100% { box-shadow: 0 0 0 18px rgba(255, 24, 65, 0); }
+}
+
+@keyframes ultras-rise {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes ultras-pop {
+  0% { transform: scale(0.6); opacity: 0; }
+  60% { transform: scale(1.08); opacity: 1; }
+  100% { transform: scale(1); }
+}
+
+@keyframes ultras-shimmer {
+  0% { background-position: -400px 0; }
+  100% { background-position: 400px 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
