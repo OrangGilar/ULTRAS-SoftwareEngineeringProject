@@ -4,7 +4,6 @@ import ULTRAS.example.UltrasBackend.User.User;
 import ULTRAS.example.UltrasBackend.User.UserRepository;
 import ULTRAS.example.UltrasBackend.Xp.XpRepository;
 import ULTRAS.example.UltrasBackend.Xp.XpTransaction;
-import com.ultras.user.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

@@ -1,4 +1,4 @@
-import type { Match, PointsLine, Prediction } from "@/app/types";
+import type { Match, PointsLine, Prediction } from "../app/types";
 
 const POINTS = {
   exact: 50,

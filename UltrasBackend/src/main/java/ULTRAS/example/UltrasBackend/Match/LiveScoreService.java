@@ -2,7 +2,6 @@ package ULTRAS.example.UltrasBackend.Match;
 
 import ULTRAS.example.UltrasBackend.Common.ApiException;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -10,6 +9,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import tools.jackson.databind.ObjectMapper;
 
 import java.time.Duration;
 import java.time.OffsetDateTime;
@@ -136,8 +136,7 @@ public class LiveScoreService {
             catch (Exception ex) { log.debug("Couldn't parse kickoff date '{}'", item.fixture().date()); }
         }
         if (item.fixture().venue() != null) entity.setVenue(item.fixture().venue().name());
-        try { entity.setRawPayload(objectMapper.writeValueAsString(item)); }
-        catch (JsonProcessingException ex) { log.debug("Couldn't serialize raw payload for fixture {}", apiId); }
+        entity.setRawPayload(objectMapper.writeValueAsString(item));
         entity.setLastSyncedAt(now);
         matchRepo.save(entity);
     }
