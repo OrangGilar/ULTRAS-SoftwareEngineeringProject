@@ -1,8 +1,0 @@
-# Claude Code
-.claude/
-.agents/
-skills-lock.json
-
-# Temporary scratch files
-temp_page.tsx
-temp_page_gilar.tsx
