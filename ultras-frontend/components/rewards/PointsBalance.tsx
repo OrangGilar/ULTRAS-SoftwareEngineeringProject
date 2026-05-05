@@ -1,42 +1,43 @@
 "use client";
 
 import Link from "next/link";
-import { Coins } from "lucide-react";
 import { useLocalUser } from "@/hooks/useLocalUser";
-import { cn } from "@/lib/utils";
 
 export function PointsBalance({ compact }: { compact?: boolean }) {
   const { user } = useLocalUser();
+
   if (compact) {
     return (
       <Link
         href="/rewards"
-        className="inline-flex items-center gap-1.5 rounded-full bg-[var(--color-accent)]/15 px-3 py-1 text-xs font-bold tabular-nums text-[var(--color-accent)] transition hover:bg-[var(--color-accent)]/25"
+        className="inline-flex items-baseline gap-1.5 font-display text-sm font-bold tabular-nums tracking-[-0.01em] text-[var(--color-text)] transition hover:text-[var(--color-primary)]"
       >
-        <Coins size={14} />
+        <span className="font-mono-label text-[10px] font-normal text-[var(--color-text-faint)]">
+          PTS
+        </span>
         {user.points.toLocaleString()}
       </Link>
     );
   }
+
   return (
     <Link
       href="/rewards"
-      className={cn(
-        "flex items-center justify-between rounded-2xl border border-[var(--color-line)] bg-gradient-to-br from-[var(--color-surface)] to-[var(--color-surface-2)] p-4 transition hover:border-[var(--color-accent)]/40"
-      )}
+      className="group block border-y border-[var(--color-line)] py-5 transition hover:border-[var(--color-text)]"
     >
-      <div className="flex items-center gap-3">
-        <span className="grid h-10 w-10 place-items-center rounded-full bg-[var(--color-accent)]/20 text-[var(--color-accent)]">
-          <Coins size={20} />
-        </span>
-        <div>
-          <p className="text-[10px] uppercase tracking-wider text-[var(--color-text-faint)]">
-            Your points
-          </p>
-          <p className="font-display text-2xl tabular-nums">{user.points.toLocaleString()}</p>
+      <div className="flex items-end justify-between gap-4">
+        <div className="flex flex-col">
+          <span className="font-mono-label text-[10px] text-[var(--color-text-faint)]">
+            Points balance
+          </span>
+          <span className="font-display text-5xl font-bold tabular-nums leading-none tracking-[-0.04em]">
+            {user.points.toLocaleString()}
+          </span>
         </div>
+        <span className="font-mono-label text-[10px] text-[var(--color-text-muted)] transition group-hover:text-[var(--color-primary)]">
+          Open rewards →
+        </span>
       </div>
-      <span className="text-xs text-[var(--color-text-muted)]">Open rewards →</span>
     </Link>
   );
 }

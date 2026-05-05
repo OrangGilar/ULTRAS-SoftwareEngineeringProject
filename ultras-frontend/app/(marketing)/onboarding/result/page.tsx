@@ -28,12 +28,12 @@ export default function QuizResultPage() {
 
   if (!results) {
     return (
-      <div className="space-y-4">
-        <Skeleton className="h-7 w-2/3" />
+      <div className="space-y-6">
+        <Skeleton className="h-8 w-1/2" />
         <Skeleton className="h-72 w-full" rounded="lg" />
         <div className="grid grid-cols-2 gap-3">
-          <Skeleton className="h-40" rounded="lg" />
-          <Skeleton className="h-40" rounded="lg" />
+          <Skeleton className="h-28" rounded="lg" />
+          <Skeleton className="h-28" rounded="lg" />
         </div>
       </div>
     );
@@ -43,13 +43,15 @@ export default function QuizResultPage() {
   const others = results.filter((_, i) => i !== activeIdx);
 
   return (
-    <div className="space-y-6">
-      <div className="text-center">
-        <p className="text-xs uppercase tracking-widest text-[var(--color-text-faint)]">
+    <div className="space-y-10">
+      <header>
+        <p className="font-mono-label text-[10px] text-[var(--color-text-faint)]">
           Your Liga 1 match
         </p>
-        <h1 className="mt-2 font-display text-4xl">{top.club.name}</h1>
-      </div>
+        <h1 className="mt-3 font-display text-5xl font-bold leading-[0.95] tracking-[-0.04em] md:text-6xl">
+          {top.club.name}.
+        </h1>
+      </header>
 
       <ClubRecommendationCard
         club={top.club}
@@ -71,17 +73,17 @@ export default function QuizResultPage() {
           Adopt {top.club.shortName}
         </Button>
       ) : (
-        <div className="rounded-2xl border border-[var(--color-success)]/40 bg-[var(--color-success)]/10 p-4 text-center text-sm text-[var(--color-success)]">
-          Welcome to the {top.club.motto.toLowerCase()}. Heading to your feed…
+        <div className="border-t-2 border-[var(--color-success)] pt-4 text-sm text-[var(--color-success)]">
+          Welcome to the {top.club.motto.toLowerCase()}. Heading to your feed.
         </div>
       )}
 
       {others.length > 0 && (
-        <div>
-          <p className="mb-3 text-xs uppercase tracking-wider text-[var(--color-text-muted)]">
+        <section>
+          <p className="mb-4 border-b border-[var(--color-line)] pb-2 font-mono-label text-[10px] text-[var(--color-text-muted)]">
             Or consider
           </p>
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-2 gap-0 divide-x divide-[var(--color-line)]">
             {others.map((r) => (
               <button
                 key={r.club.id}
@@ -90,31 +92,27 @@ export default function QuizResultPage() {
                   setActiveIdx(results.findIndex((x) => x.club.id === r.club.id));
                   setAdopted(false);
                 }}
-                className="group rounded-2xl border border-[var(--color-line)] bg-[var(--color-surface)] p-4 text-left transition hover:border-[var(--color-surface-3)]"
+                className="group flex items-center gap-3 py-4 px-4 text-left transition hover:bg-[var(--color-surface)]"
               >
-                <div className="flex items-center gap-3">
-                  <span
-                    aria-hidden
-                    className="grid h-10 w-10 place-items-center rounded-full text-xl ring-1 ring-[var(--color-line)]"
-                    style={{ background: `linear-gradient(135deg, ${r.club.colors[0]}, ${r.club.colors[1]})` }}
-                  >
-                    {r.club.logo ? (
-                      <img src={r.club.logo} alt={r.club.name} className="h-4/5 w-4/5 object-contain" />
-                    ) : (
-                      r.club.crestEmoji
-                    )}
-                  </span>
-                  <div>
-                    <p className="text-sm font-bold">{r.club.shortName}</p>
-                    <p className="text-[10px] uppercase tracking-wider text-[var(--color-text-faint)]">
-                      {r.matchPercent}% match
-                    </p>
-                  </div>
+                <span className="grid h-12 w-12 place-items-center" aria-hidden>
+                  {r.club.logo ? (
+                    <img src={r.club.logo} alt={r.club.name} className="h-full w-full object-contain" />
+                  ) : (
+                    <span className="text-xl">{r.club.crestEmoji}</span>
+                  )}
+                </span>
+                <div className="min-w-0">
+                  <p className="font-display text-base font-bold tracking-[-0.01em] transition group-hover:text-[var(--color-primary)]">
+                    {r.club.shortName}
+                  </p>
+                  <p className="font-mono-label text-[10px] text-[var(--color-text-faint)]">
+                    {r.matchPercent}% match
+                  </p>
                 </div>
               </button>
             ))}
           </div>
-        </div>
+        </section>
       )}
     </div>
   );

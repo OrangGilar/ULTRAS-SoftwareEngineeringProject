@@ -20,33 +20,39 @@ export function CrestGame({ game }: { game: Game }) {
   const club = clubsById[q.clubId];
 
   return (
-    <GameShell title={game.name} subtitle={`Round ${Math.min(idx + 1, crestQuestions.length)} of ${crestQuestions.length}`} score={score}>
+    <GameShell
+      title={game.name}
+      subtitle={`Round ${Math.min(idx + 1, crestQuestions.length)} of ${crestQuestions.length}`}
+      score={score}
+    >
       {phase === "intro" && (
-        <div className="space-y-5 text-center">
-          <p className="text-sm text-[var(--color-text-muted)]">
-            We blur the crest. You name the club. {crestQuestions.length} rounds — 3+ wins {game.rewardPerWin} pts.
+        <div className="mx-auto max-w-md space-y-6 py-12 text-center">
+          <p className="prose-line text-base text-[var(--color-text-muted)]">
+            We blur the crest. You name the club. {crestQuestions.length} rounds. 3+ wins {game.rewardPerWin} pts.
           </p>
-          <Button onClick={() => setPhase("playing")} size="lg">Start</Button>
+          <Button onClick={() => setPhase("playing")} size="lg">
+            Start
+          </Button>
         </div>
       )}
 
       {phase === "playing" && club && (
-        <div className="space-y-5">
-          <div className="mx-auto grid h-44 w-44 place-items-center rounded-full text-7xl ring-2 ring-[var(--color-line)]"
+        <div className="space-y-8">
+          <div
+            className="mx-auto grid h-48 w-48 place-items-center text-7xl"
             style={{
-              background: `linear-gradient(135deg, ${club.colors[0]}, ${club.colors[1]})`,
-              filter: picked !== null ? "blur(0)" : "blur(8px) saturate(0.7)",
+              filter: picked !== null ? "blur(0)" : "blur(12px) saturate(0.7)",
               transition: "filter 220ms ease",
             }}
             aria-hidden
           >
             {club.logo ? (
-              <img src={club.logo} alt={club.name} className="h-4/5 w-4/5 object-contain" />
+              <img src={club.logo} alt={club.name} className="h-full w-full object-contain" />
             ) : (
               club.crestEmoji
             )}
           </div>
-          <div className="grid gap-2">
+          <div className="grid gap-3">
             {q.choices.map((c, i) => {
               const isCorrect = picked !== null && i === q.answerIndex;
               const isWrong = picked === i && i !== q.answerIndex;
@@ -72,10 +78,11 @@ export function CrestGame({ game }: { game: Game }) {
                     }, 800);
                   }}
                   className={cn(
-                    "rounded-xl border p-3 text-left text-sm transition",
-                    picked === null && "border-[var(--color-line)] bg-[var(--color-surface)] hover:border-[var(--color-surface-3)]",
-                    isCorrect && "border-[var(--color-success)] bg-[var(--color-success)]/15",
-                    isWrong && "border-[var(--color-danger)] bg-[var(--color-danger)]/15"
+                    "border p-4 text-left text-base transition",
+                    picked === null &&
+                      "border-[var(--color-line)] hover:border-[var(--color-text)]",
+                    isCorrect && "border-[var(--color-primary)] bg-[var(--color-primary)] text-[var(--color-pure-white)]",
+                    isWrong && "border-[var(--color-line)] text-[var(--color-text-faint)] line-through",
                   )}
                 >
                   {c}
@@ -87,14 +94,22 @@ export function CrestGame({ game }: { game: Game }) {
       )}
 
       {phase === "done" && (
-        <div className="space-y-4 text-center">
-          <p className="font-display text-6xl tabular-nums text-[var(--color-accent)]">
-            {score}<span className="text-[var(--color-text-faint)]">/{crestQuestions.length}</span>
+        <div className="mx-auto max-w-md space-y-6 py-12 text-center">
+          <p className="font-mono-label text-[10px] text-[var(--color-text-faint)]">
+            Final score
+          </p>
+          <p className="font-display text-7xl font-bold tabular-nums leading-none tracking-[-0.04em] md:text-8xl">
+            {score}
+            <span className="text-[var(--color-text-faint)]">/{crestQuestions.length}</span>
           </p>
           {score >= 3 ? (
-            <p className="text-sm text-[var(--color-success)]">+{game.rewardPerWin} pts added.</p>
+            <p className="font-mono-label text-xs text-[var(--color-primary)]">
+              +{game.rewardPerWin} pts added.
+            </p>
           ) : (
-            <p className="text-sm text-[var(--color-text-muted)]">3+ next time gets you the points.</p>
+            <p className="font-mono-label text-xs text-[var(--color-text-muted)]">
+              3+ next time gets you the points.
+            </p>
           )}
           <Button
             onClick={() => {

@@ -16,25 +16,36 @@ export function GameShell({
 }) {
   return (
     <div className="flex min-h-[calc(100vh-3.5rem)] flex-col">
-      <div className="flex items-center justify-between border-b border-[var(--color-line)] bg-[var(--color-surface)] px-4 py-3">
+      <div className="flex items-center justify-between border-b border-[var(--color-line)] px-5 py-4">
         <div>
-          <h1 className="text-base font-bold">{title}</h1>
-          {subtitle && <p className="text-xs text-[var(--color-text-muted)]">{subtitle}</p>}
+          <h1 className="font-display text-base font-bold tracking-[-0.01em]">{title}</h1>
+          {subtitle && (
+            <p className="font-mono-label text-[10px] text-[var(--color-text-faint)]">
+              {subtitle}
+            </p>
+          )}
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-4">
           {typeof score === "number" && (
-            <span className="font-display text-lg tabular-nums text-[var(--color-accent)]">{score}</span>
+            <div className="flex items-baseline gap-1.5">
+              <span className="font-mono-label text-[10px] text-[var(--color-text-faint)]">
+                Score
+              </span>
+              <span className="font-display text-xl font-bold tabular-nums leading-none tracking-[-0.02em]">
+                {score}
+              </span>
+            </div>
           )}
           <Link
             href="/games"
             aria-label="Exit game"
-            className="grid h-8 w-8 place-items-center rounded-full bg-[var(--color-surface-2)] text-[var(--color-text-muted)] transition hover:text-[var(--color-text)]"
+            className="grid h-8 w-8 place-items-center rounded-full border border-[var(--color-line)] text-[var(--color-text-muted)] transition hover:border-[var(--color-text)] hover:text-[var(--color-text)]"
           >
-            <X size={16} />
+            <X size={14} />
           </Link>
         </div>
       </div>
-      <div className="flex-1 px-4 py-6">{children}</div>
+      <div className="flex-1 px-5 py-8">{children}</div>
     </div>
   );
 }

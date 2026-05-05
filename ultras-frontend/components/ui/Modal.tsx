@@ -25,7 +25,7 @@ export function Modal({ open, onClose, title, children, footer }: ModalProps) {
 
   return (
     <div
-      className="fixed inset-0 z-[100] flex items-end justify-center bg-black/60 backdrop-blur-sm md:items-center"
+      className="fixed inset-0 z-[100] flex items-end justify-center bg-[var(--color-pitch-black)]/80 md:items-center"
       onClick={onClose}
       role="dialog"
       aria-modal="true"
@@ -33,15 +33,17 @@ export function Modal({ open, onClose, title, children, footer }: ModalProps) {
       <div
         onClick={(e) => e.stopPropagation()}
         className={cn(
-          "w-full max-w-md rounded-t-3xl border border-[var(--color-line)] bg-[var(--color-surface)] p-5 md:rounded-3xl",
-          "[animation:ultras-rise_180ms_ease-out_both]"
+          "w-full max-w-md border border-[var(--color-line)] bg-[var(--color-bg)] p-6",
+          "[animation:ultras-rise_180ms_ease-out_both]",
         )}
       >
         {title && (
-          <h2 className="mb-2 text-lg font-bold tracking-tight">{title}</h2>
+          <h2 className="mb-3 font-display text-xl font-bold leading-tight tracking-[-0.02em]">
+            {title}
+          </h2>
         )}
-        <div className="text-sm text-[var(--color-text-muted)]">{children}</div>
-        {footer && <div className="mt-5 flex justify-end gap-2">{footer}</div>}
+        <div className="prose-line text-sm text-[var(--color-text-muted)]">{children}</div>
+        {footer && <div className="mt-6 flex justify-end gap-3">{footer}</div>}
       </div>
     </div>
   );

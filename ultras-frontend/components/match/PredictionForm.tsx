@@ -6,7 +6,6 @@ import { getClub } from "@/lib/mock/clubs";
 import { ScorePicker } from "./ScorePicker";
 import { Button } from "@/components/ui/Button";
 import { Modal } from "@/components/ui/Modal";
-import { Badge } from "@/components/ui/Badge";
 import { useLocalUser } from "@/hooks/useLocalUser";
 import { cn } from "@/lib/utils";
 
@@ -61,7 +60,7 @@ export function PredictionForm({ match, onSaved }: PredictionFormProps) {
   if (!home || !away) return null;
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-10">
       <ScorePicker
         value={score}
         onChange={setScore}
@@ -69,78 +68,80 @@ export function PredictionForm({ match, onSaved }: PredictionFormProps) {
         awayLabel={away.shortName}
       />
 
-      <div className="rounded-2xl border border-[var(--color-line)] bg-[var(--color-surface)] p-4">
-        <p className="mb-2 text-xs font-bold uppercase tracking-wider text-[var(--color-text-muted)]">
-          Bonus — first scorer
+      <section className="space-y-3">
+        <p className="font-mono-label text-[10px] text-[var(--color-text-muted)]">
+          First scorer (bonus)
         </p>
         <select
           value={scorer}
           onChange={(e) => setScorer(e.target.value)}
-          className="h-11 w-full rounded-xl border border-[var(--color-line)] bg-[var(--color-surface-2)] px-3 text-sm"
+          className="h-11 w-full border-0 border-b border-[var(--color-line-strong)] bg-transparent px-0 text-base text-[var(--color-text)] focus:border-[var(--color-primary)] focus:outline-none"
         >
-          <option value="">Skip — no pick</option>
+          <option value="">Skip. No pick.</option>
           {scorerOptions.map((s) => (
             <option key={s.id} value={s.id}>
               {s.id} ({s.side === "home" ? home.shortName : away.shortName})
             </option>
           ))}
         </select>
-      </div>
+      </section>
 
-      <div className="rounded-2xl border border-[var(--color-line)] bg-[var(--color-surface)] p-4">
-        <p className="mb-2 text-xs font-bold uppercase tracking-wider text-[var(--color-text-muted)]">
-          Bonus — total cards
+      <section className="space-y-3">
+        <p className="font-mono-label text-[10px] text-[var(--color-text-muted)]">
+          Total cards (bonus)
         </p>
-        <div className="flex gap-2">
+        <div className="flex gap-3">
           {(["under", "over"] as const).map((c) => (
             <button
               key={c}
               type="button"
               onClick={() => setCards((prev) => (prev === c ? "" : c))}
               className={cn(
-                "flex-1 rounded-xl border px-4 py-3 text-sm font-medium transition",
+                "flex-1 border px-4 py-4 font-mono-label text-xs transition",
                 cards === c
-                  ? "border-[var(--color-primary)] bg-[var(--color-primary-soft)] text-[var(--color-text)]"
-                  : "border-[var(--color-line)] bg-[var(--color-surface-2)] text-[var(--color-text-muted)] hover:text-[var(--color-text)]"
+                  ? "border-[var(--color-primary)] bg-[var(--color-primary)] text-[var(--color-pure-white)]"
+                  : "border-[var(--color-line)] text-[var(--color-text-muted)] hover:border-[var(--color-text)] hover:text-[var(--color-text)]",
               )}
             >
               {c === "under" ? "Under 3.5" : "Over 3.5"}
             </button>
           ))}
         </div>
-      </div>
+      </section>
 
-      <div className="rounded-2xl border border-[var(--color-line)] bg-[var(--color-surface)] p-4">
-        <div className="mb-3 flex items-center justify-between">
-          <p className="text-xs font-bold uppercase tracking-wider text-[var(--color-text-muted)]">
-            Confidence
+      <section className="space-y-3">
+        <div className="flex items-baseline justify-between">
+          <p className="font-mono-label text-[10px] text-[var(--color-text-muted)]">
+            Confidence multiplier
           </p>
-          <Badge variant="warning">×{confidence} multiplier</Badge>
+          <p className="font-display text-2xl font-bold tabular-nums leading-none text-[var(--color-primary)]">
+            ×{confidence}
+          </p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex gap-3">
           {([1, 2, 3] as Confidence[]).map((c) => (
             <button
               key={c}
               type="button"
               onClick={() => setConfidence(c)}
               className={cn(
-                "flex-1 rounded-xl border px-4 py-3 text-sm font-semibold transition",
+                "flex-1 border py-5 font-display text-2xl font-bold tracking-[-0.02em] transition",
                 confidence === c
-                  ? "border-[var(--color-accent)] bg-[var(--color-accent)]/15 text-[var(--color-accent)]"
-                  : "border-[var(--color-line)] bg-[var(--color-surface-2)] text-[var(--color-text-muted)]"
+                  ? "border-[var(--color-primary)] text-[var(--color-primary)]"
+                  : "border-[var(--color-line)] text-[var(--color-text-faint)] hover:border-[var(--color-text)] hover:text-[var(--color-text)]",
               )}
             >
               ×{c}
             </button>
           ))}
         </div>
-        <p className="mt-2 text-xs text-[var(--color-text-faint)]">
-          Higher multipliers reward bold calls — but pay zero if you miss.
+        <p className="prose-line text-xs text-[var(--color-text-faint)]">
+          Higher multipliers reward bold calls. Pay zero if you miss.
         </p>
-      </div>
+      </section>
 
       {saved ? (
-        <div className="rounded-2xl border border-[var(--color-success)]/40 bg-[var(--color-success)]/10 p-4 text-center text-sm text-[var(--color-success)]">
+        <div className="border-t-2 border-[var(--color-success)] pt-4 text-sm text-[var(--color-success)]">
           Prediction locked. Edit anytime until kickoff.
         </div>
       ) : (
@@ -165,7 +166,11 @@ export function PredictionForm({ match, onSaved }: PredictionFormProps) {
         }
       >
         <p className="mb-2">
-          {home.shortName} <span className="font-display text-base tabular-nums text-[var(--color-text)]">{score.home}–{score.away}</span> {away.shortName}, ×{confidence}.
+          {home.shortName}{" "}
+          <span className="font-display text-base font-bold tabular-nums text-[var(--color-text)]">
+            {score.home}.{score.away}
+          </span>{" "}
+          {away.shortName}, ×{confidence}.
         </p>
         <p>You can edit this until kickoff. Higher multipliers mean zero points if you miss.</p>
       </Modal>

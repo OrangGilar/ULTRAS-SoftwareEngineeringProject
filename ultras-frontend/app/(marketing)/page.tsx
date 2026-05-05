@@ -2,68 +2,128 @@ import Link from "next/link";
 import { Button } from "@/components/ui/Button";
 import { clubs } from "@/lib/mock/clubs";
 
+const RITUALS = [
+  {
+    no: "01",
+    title: "Predict",
+    body: "Lock scorelines. Name first scorers. Ride the multiplier on takes you actually believe.",
+  },
+  {
+    no: "02",
+    title: "Debate",
+    body: "Threads with the rest of the terrace. Sharp opinions, civil voices, no warm bath.",
+  },
+  {
+    no: "03",
+    title: "Earn",
+    body: "Points compound into limited scarves, stadium tours, and pitch-side passes.",
+  },
+];
+
 export default function LandingPage() {
   return (
-    <div className="relative overflow-hidden">
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-0 -z-10 opacity-40"
-        style={{
-          background:
-            "radial-gradient(ellipse 80% 60% at 50% -10%, rgba(225,29,46,0.45), transparent 60%), radial-gradient(ellipse 50% 40% at 90% 30%, rgba(247,201,72,0.18), transparent)",
-        }}
-      />
-      <section className="mx-auto flex w-full max-w-screen-lg flex-col items-center px-4 py-16 text-center md:py-24">
-        <span className="rounded-full border border-[var(--color-line)] bg-[var(--color-surface)] px-3 py-1 text-xs uppercase tracking-widest text-[var(--color-text-muted)]">
-          Liga 1 · Indonesia
-        </span>
-        <h1 className="mt-6 font-display text-5xl leading-[1.05] tracking-tight md:text-7xl">
-          Built for the <span className="text-[var(--color-primary)]">terraces</span>.<br />
-          Made for the <span className="text-[var(--color-accent)]">faithful</span>.
-        </h1>
-        <p className="mt-5 max-w-xl text-base text-[var(--color-text-muted)] md:text-lg">
-          Predict every Liga 1 match. Earn points off your hottest takes.
-          Argue with strangers about three-at-the-back. Find your club. Stay loud.
-        </p>
-        <div className="mt-8 flex flex-col items-center gap-3 sm:flex-row">
-          <Link href="/onboarding/quiz">
-            <Button size="lg" variant="primary">Find my club</Button>
-          </Link>
-          <Link href="/feed">
-            <Button size="lg" variant="secondary">I'm already a supporter</Button>
-          </Link>
+    <div className="bg-[var(--color-bg)] text-[var(--color-text)]">
+      <section className="mx-auto flex w-full max-w-screen-xl flex-col px-6 pb-24 pt-16 md:pt-24">
+        <div className="font-mono-label text-xs text-[var(--color-text-muted)]">
+          Liga 1 / Indonesia
         </div>
 
-        <div className="mt-12 flex flex-wrap items-center justify-center gap-3">
-          {clubs.slice(0, 8).map((c) => (
-            <span
-              key={c.id}
-              title={c.name}
-              className="grid h-12 w-12 place-items-center rounded-full text-xl ring-1 ring-[var(--color-line)]"
-              style={{ background: `linear-gradient(135deg, ${c.colors[0]}, ${c.colors[1]})` }}
-              aria-label={c.name}
-            >
-              {c.logo ? (
-                <img src={c.logo} alt={c.name} className="h-4/5 w-4/5 object-contain" />
-              ) : (
-                c.crestEmoji
-              )}
-            </span>
-          ))}
+        <h1 className="font-display mt-10 text-[clamp(64px,13vw,200px)] font-bold leading-[0.92] tracking-[-0.04em]">
+          For the
+          <br />
+          <span className="text-[var(--color-primary)]">terraces</span>.
+        </h1>
+
+        <p className="prose-line mt-12 text-[clamp(18px,2.2vw,28px)] leading-snug text-[var(--color-text-muted)]">
+          Predict every Liga 1 match. Earn points off your hottest takes.
+          Find your club. Stay loud.
+        </p>
+
+        <div className="mt-12 flex flex-col items-start gap-4 sm:flex-row sm:items-center">
+          <Link href="/register">
+            <Button size="lg" variant="primary">
+              Find my club
+            </Button>
+          </Link>
+          <Link
+            href="/login"
+            className="font-mono-label text-xs text-[var(--color-text-muted)] underline-offset-8 hover:text-[var(--color-text)] hover:underline"
+          >
+            I'm already a supporter →
+          </Link>
         </div>
       </section>
 
-      <section className="mx-auto grid w-full max-w-screen-lg grid-cols-1 gap-4 px-4 pb-20 md:grid-cols-3">
-        {[
-          { title: "Predict", body: "Lock scorelines, name first scorers, ride your confidence multiplier." },
-          { title: "Earn", body: "Points compound into limited scarves, stadium tours, and pitch-side passes." },
-          { title: "Debate", body: "Threads with your fellow ultras. Loud, sharp, civil. (Mostly.)" },
-        ].map((f) => (
-          <div key={f.title} className="rounded-2xl border border-[var(--color-line)] bg-[var(--color-surface)] p-6">
-            <h3 className="text-lg font-bold">{f.title}</h3>
-            <p className="mt-1 text-sm text-[var(--color-text-muted)]">{f.body}</p>
+      <section className="border-y border-[var(--color-line)] bg-[var(--color-bg)]">
+        <div className="mx-auto w-full max-w-screen-xl px-6 py-6">
+          <div className="font-mono-label text-[10px] text-[var(--color-text-faint)]">
+            18 clubs. One league. Pick your colours.
           </div>
-        ))}
+          <div className="mt-4 grid grid-cols-6 gap-x-6 gap-y-6 sm:grid-cols-9 md:grid-cols-12 lg:grid-cols-18">
+            {clubs.map((c) => (
+              <div
+                key={c.id}
+                title={c.name}
+                aria-label={c.name}
+                className="grid aspect-square place-items-center"
+              >
+                {c.logo ? (
+                  <img
+                    src={c.logo}
+                    alt={c.name}
+                    className="h-full w-full object-contain opacity-90 transition hover:opacity-100"
+                  />
+                ) : (
+                  <span className="text-2xl">{c.crestEmoji}</span>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="mx-auto w-full max-w-screen-xl px-6 py-24 md:py-32">
+        <div className="font-mono-label text-xs text-[var(--color-text-muted)]">
+          The rituals
+        </div>
+
+        <ol className="mt-10 divide-y divide-[var(--color-line)]">
+          {RITUALS.map((r, i) => (
+            <li
+              key={r.no}
+              className={
+                i % 2 === 0
+                  ? "grid grid-cols-1 gap-6 py-10 md:grid-cols-12 md:py-16"
+                  : "grid grid-cols-1 gap-6 py-10 md:grid-cols-12 md:py-16 md:[&>*:first-child]:col-start-2"
+              }
+            >
+              <div className="font-mono-label text-sm text-[var(--color-text-faint)] md:col-span-2">
+                {r.no}
+              </div>
+              <h3 className="font-display text-5xl font-bold leading-none tracking-tight md:col-span-4 md:text-7xl">
+                {r.title}.
+              </h3>
+              <p className="prose-line text-lg leading-snug text-[var(--color-text-muted)] md:col-span-5 md:text-xl">
+                {r.body}
+              </p>
+            </li>
+          ))}
+        </ol>
+      </section>
+
+      <section className="bg-[var(--color-primary)] text-[var(--color-pure-white)]">
+        <div className="mx-auto flex w-full max-w-screen-xl flex-col gap-8 px-6 py-20 md:flex-row md:items-end md:justify-between md:py-28">
+          <h2 className="font-display text-5xl font-bold leading-[0.95] tracking-tight md:text-7xl">
+            Pick a side.
+            <br />
+            Stay loud.
+          </h2>
+          <Link href="/onboarding/quiz">
+            <Button size="lg" variant="accent">
+              Find my club
+            </Button>
+          </Link>
+        </div>
       </section>
     </div>
   );

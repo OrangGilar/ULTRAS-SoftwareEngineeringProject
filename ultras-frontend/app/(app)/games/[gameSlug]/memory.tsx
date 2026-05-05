@@ -85,10 +85,10 @@ export function MemoryGame({ game }: { game: Game }) {
   const club = useMemo(() => Object.fromEntries(clubs.map((c) => [c.id, c])), []);
 
   return (
-    <GameShell title={game.name} subtitle={`Moves: ${moves}`} score={matched}>
+    <GameShell title={game.name} subtitle={`Moves ${moves}`} score={matched}>
       {phase === "intro" && (
-        <div className="space-y-5 text-center">
-          <p className="text-sm text-[var(--color-text-muted)]">
+        <div className="mx-auto max-w-md space-y-6 py-12 text-center">
+          <p className="prose-line text-base text-[var(--color-text-muted)]">
             Match the crest pairs in as few moves as possible. Under {total + 5} moves wins full points.
           </p>
           <Button
@@ -104,7 +104,7 @@ export function MemoryGame({ game }: { game: Game }) {
       )}
 
       {phase === "playing" && (
-        <div className="grid grid-cols-3 gap-3 sm:grid-cols-4">
+        <div className="grid grid-cols-3 gap-2 sm:grid-cols-4">
           {deck.map((c) => {
             const cl = club[c.clubId];
             const flipped = c.flipped || c.matched;
@@ -115,17 +115,12 @@ export function MemoryGame({ game }: { game: Game }) {
                 disabled={flipped}
                 onClick={() => handleFlip(c.id)}
                 className={cn(
-                  "aspect-square rounded-2xl border text-3xl transition",
+                  "aspect-square border text-3xl transition",
                   flipped
-                    ? "border-[var(--color-line)]"
-                    : "border-[var(--color-line)] bg-[var(--color-surface)] hover:border-[var(--color-surface-3)]",
-                  c.matched && "opacity-50"
+                    ? "border-[var(--color-line)] bg-transparent"
+                    : "border-[var(--color-line)] bg-[var(--color-surface)] hover:border-[var(--color-text)]",
+                  c.matched && "opacity-40",
                 )}
-                style={
-                  flipped
-                    ? { background: `linear-gradient(135deg, ${cl.colors[0]}, ${cl.colors[1]})` }
-                    : undefined
-                }
                 aria-label={flipped ? cl.name : "Hidden card"}
               >
                 {flipped ? (
@@ -134,7 +129,9 @@ export function MemoryGame({ game }: { game: Game }) {
                   ) : (
                     cl.crestEmoji
                   )
-                ) : "?"}
+                ) : (
+                  <span className="font-mono-label text-[var(--color-text-faint)]">?</span>
+                )}
               </button>
             );
           })}
@@ -142,9 +139,13 @@ export function MemoryGame({ game }: { game: Game }) {
       )}
 
       {phase === "done" && (
-        <div className="space-y-4 text-center">
-          <p className="text-xs uppercase tracking-wider text-[var(--color-text-muted)]">Cleared in</p>
-          <p className="font-display text-6xl tabular-nums text-[var(--color-accent)]">{moves} moves</p>
+        <div className="mx-auto max-w-md space-y-6 py-12 text-center">
+          <p className="font-mono-label text-[10px] text-[var(--color-text-faint)]">
+            Cleared in
+          </p>
+          <p className="font-display text-7xl font-bold tabular-nums leading-none tracking-[-0.04em] md:text-8xl">
+            {moves} <span className="text-2xl text-[var(--color-text-faint)]">moves</span>
+          </p>
           <Button
             onClick={() => {
               reset();

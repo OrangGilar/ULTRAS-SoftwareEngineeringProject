@@ -9,17 +9,17 @@ export type BadgeProps = {
 } & React.HTMLAttributes<HTMLSpanElement>;
 
 const VARIANTS: Record<Variant, string> = {
-  neutral: "bg-[var(--color-surface-2)] text-[var(--color-text-muted)]",
-  success: "bg-[var(--color-success)]/15 text-[var(--color-success)]",
-  warning: "bg-[var(--color-accent)]/15 text-[var(--color-accent)]",
-  danger: "bg-[var(--color-danger)]/15 text-[var(--color-danger)]",
-  points: "bg-[var(--color-accent)] text-black",
-  club: "bg-[var(--color-primary)]/15 text-[var(--color-primary)]",
+  neutral: "border border-[var(--color-line)] text-[var(--color-text-muted)]",
+  success: "border border-[var(--color-success)] text-[var(--color-success)]",
+  warning: "border border-[var(--color-text)] text-[var(--color-text)]",
+  danger: "border border-[var(--color-primary)] text-[var(--color-primary)]",
+  points: "bg-[var(--color-text)] text-[var(--color-pitch-black)]",
+  club: "border border-[var(--color-primary)] text-[var(--color-primary)]",
 };
 
 const SIZES = {
-  sm: "text-[10px] px-2 py-0.5",
-  md: "text-xs px-2.5 py-1",
+  sm: "text-[9px] px-2 py-0.5",
+  md: "text-[10px] px-2.5 py-1",
 };
 
 export function Badge({
@@ -33,7 +33,7 @@ export function Badge({
     <span
       {...rest}
       className={cn(
-        "inline-flex items-center gap-1 rounded-full font-semibold tracking-wide uppercase",
+        "inline-flex items-center gap-1 font-mono-label",
         VARIANTS[variant],
         SIZES[size],
         className,

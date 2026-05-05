@@ -36,7 +36,7 @@ export default function QuizPage() {
   };
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-10">
       <QuizProgress step={step + 1} total={total} />
 
       {current && (

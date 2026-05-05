@@ -4,7 +4,7 @@ export const threads: Thread[] = [
   {
     id: "t_001",
     clubId: "persija",
-    title: "Three at the back vs Persib — yes or no?",
+    title: "Three at the back vs Persib. Yes or no?",
     body: "We've been better with a back four since matchday 22. Why are we even discussing this?",
     authorName: "JakMania_88",
     authorClubId: "persija",
@@ -26,7 +26,7 @@ export const threads: Thread[] = [
   {
     id: "t_003",
     clubId: "persib",
-    title: "David da Silva contract — extend or move on?",
+    title: "David da Silva contract. Extend or move on?",
     body: "Numbers say extend. Vibes say it's time to bring through the youth. Where do you stand?",
     authorName: "BobotohSelatan",
     authorClubId: "persib",

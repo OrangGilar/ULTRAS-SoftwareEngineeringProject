@@ -3,9 +3,7 @@
 import Link from "next/link";
 import { ArrowBigUp, MessageSquare } from "lucide-react";
 import type { Thread } from "@/app/types";
-import { Card } from "@/components/ui/Card";
 import { Avatar } from "@/components/ui/Avatar";
-import { Badge } from "@/components/ui/Badge";
 import { getClub } from "@/lib/mock/clubs";
 import { useLocalUser } from "@/hooks/useLocalUser";
 import { cn, formatRelative } from "@/lib/utils";
@@ -18,44 +16,49 @@ export function ThreadCard({ thread }: { thread: Thread }) {
   const liveVotes = thread.upvotes + (userVote === 1 ? 1 : 0) + (userVote === -1 ? -1 : 0);
 
   return (
-    <Card variant="interactive" className="flex gap-3 p-4">
-      <div className="flex flex-col items-center gap-1">
-        <button
-          type="button"
-          aria-pressed={userVote === 1}
-          onClick={(e) => {
-            e.preventDefault();
-            toggleVote(thread.id, 1);
-          }}
-          className={cn(
-            "rounded-lg p-1 transition",
-            userVote === 1 ? "text-[var(--color-primary)]" : "text-[var(--color-text-faint)] hover:text-[var(--color-text-muted)]"
-          )}
-        >
-          <ArrowBigUp size={20} fill={userVote === 1 ? "currentColor" : "none"} />
-        </button>
-        <span className="font-display text-sm tabular-nums">{liveVotes}</span>
-      </div>
+    <article className="group flex gap-4 border-b border-[var(--color-line)] py-5 transition hover:border-[var(--color-text)]">
+      <button
+        type="button"
+        aria-pressed={userVote === 1}
+        aria-label="Upvote"
+        onClick={(e) => {
+          e.preventDefault();
+          toggleVote(thread.id, 1);
+        }}
+        className={cn(
+          "flex flex-col items-center gap-1 transition",
+          userVote === 1
+            ? "text-[var(--color-primary)]"
+            : "text-[var(--color-text-faint)] hover:text-[var(--color-text)]",
+        )}
+      >
+        <ArrowBigUp size={22} fill={userVote === 1 ? "currentColor" : "none"} />
+        <span className="font-display text-sm font-bold tabular-nums">{liveVotes}</span>
+      </button>
 
-      <Link href={`/community/${thread.id}`} className="flex-1">
-        <div className="mb-2 flex items-center gap-2 text-xs text-[var(--color-text-muted)]">
+      <Link href={`/community/${thread.id}`} className="flex-1 min-w-0">
+        <div className="mb-2 flex items-center gap-2 font-mono-label text-[10px] text-[var(--color-text-faint)]">
           <Avatar name={thread.authorName} logo={authorClub?.logo} emoji={authorClub?.crestEmoji} size="xs" />
-          <span className="font-medium text-[var(--color-text)]">{thread.authorName}</span>
-          <span>·</span>
+          <span className="text-[var(--color-text-muted)]">{thread.authorName}</span>
+          <span>/</span>
           <span suppressHydrationWarning>{formatRelative(thread.createdAtISO)}</span>
           {threadClub && (
-            <Badge variant="club" size="sm" className="ml-auto">
+            <span className="ml-auto text-[var(--color-text-muted)]">
               {threadClub.shortName}
-            </Badge>
+            </span>
           )}
         </div>
-        <h3 className="text-base font-bold leading-snug">{thread.title}</h3>
-        <p className="mt-1 line-clamp-2 text-sm text-[var(--color-text-muted)]">{thread.body}</p>
-        <div className="mt-3 flex items-center gap-1.5 text-xs text-[var(--color-text-faint)]">
-          <MessageSquare size={14} />
+        <h3 className="font-display text-lg font-bold leading-tight tracking-[-0.01em] transition group-hover:text-[var(--color-primary)]">
+          {thread.title}
+        </h3>
+        <p className="prose-line mt-1 line-clamp-2 text-sm leading-snug text-[var(--color-text-muted)]">
+          {thread.body}
+        </p>
+        <div className="mt-3 flex items-center gap-1.5 font-mono-label text-[10px] text-[var(--color-text-faint)]">
+          <MessageSquare size={12} />
           <span>{thread.replyCount} replies</span>
         </div>
       </Link>
-    </Card>
+    </article>
   );
 }

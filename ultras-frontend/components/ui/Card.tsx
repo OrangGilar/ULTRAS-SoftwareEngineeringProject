@@ -9,10 +9,10 @@ export type CardProps = {
 } & React.HTMLAttributes<HTMLElement>;
 
 const VARIANTS: Record<Variant, string> = {
-  flat: "bg-[var(--color-surface)] border border-[var(--color-line)]",
-  elevated: "bg-[var(--color-surface)] border border-[var(--color-line)] shadow-lg shadow-black/40",
+  flat: "border border-[var(--color-line)]",
+  elevated: "border border-[var(--color-line)] bg-[var(--color-surface)]",
   interactive:
-    "bg-[var(--color-surface)] border border-[var(--color-line)] transition hover:-translate-y-0.5 hover:border-[var(--color-surface-3)] hover:shadow-lg hover:shadow-black/40 active:translate-y-0",
+    "border border-[var(--color-line)] transition hover:border-[var(--color-text)] active:bg-[var(--color-surface)]",
 };
 
 export function Card({
@@ -26,7 +26,7 @@ export function Card({
   return (
     <Component
       {...rest}
-      className={cn("rounded-2xl p-4", VARIANTS[variant], className)}
+      className={cn("p-5", VARIANTS[variant], className)}
     >
       {children}
     </Component>

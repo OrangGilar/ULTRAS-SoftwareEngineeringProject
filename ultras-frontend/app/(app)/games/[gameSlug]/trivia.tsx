@@ -38,20 +38,28 @@ export function TriviaGame({ game }: { game: Game }) {
   };
 
   return (
-    <GameShell title={game.name} subtitle={`Q${Math.min(idx + 1, triviaQuestions.length)} of ${triviaQuestions.length}`} score={score}>
+    <GameShell
+      title={game.name}
+      subtitle={`Q${Math.min(idx + 1, triviaQuestions.length)} of ${triviaQuestions.length}`}
+      score={score}
+    >
       {phase === "intro" && (
-        <div className="space-y-5 text-center">
-          <p className="text-sm text-[var(--color-text-muted)]">
+        <div className="mx-auto max-w-md space-y-6 py-12 text-center">
+          <p className="prose-line text-base text-[var(--color-text-muted)]">
             Answer 5 quick questions on Liga 1. 3+ correct unlocks {game.rewardPerWin} pts.
           </p>
-          <Button onClick={() => setPhase("playing")} size="lg">Start</Button>
+          <Button onClick={() => setPhase("playing")} size="lg">
+            Start
+          </Button>
         </div>
       )}
 
       {phase === "playing" && (
-        <div className="space-y-4">
-          <h2 className="font-display text-xl leading-tight">{q.prompt}</h2>
-          <div className="grid gap-2">
+        <div className="space-y-8">
+          <h2 className="font-display text-2xl font-bold leading-tight tracking-[-0.02em] md:text-3xl">
+            {q.prompt}
+          </h2>
+          <div className="grid gap-3">
             {q.choices.map((c, i) => {
               const correct = picked !== null && i === q.answerIndex;
               const wrong = picked === i && i !== q.answerIndex;
@@ -61,10 +69,11 @@ export function TriviaGame({ game }: { game: Game }) {
                   type="button"
                   onClick={() => onPick(i)}
                   className={cn(
-                    "rounded-xl border p-3 text-left text-sm transition",
-                    picked === null && "border-[var(--color-line)] bg-[var(--color-surface)] hover:border-[var(--color-surface-3)]",
-                    correct && "border-[var(--color-success)] bg-[var(--color-success)]/15",
-                    wrong && "border-[var(--color-danger)] bg-[var(--color-danger)]/15"
+                    "border p-4 text-left text-base transition",
+                    picked === null &&
+                      "border-[var(--color-line)] hover:border-[var(--color-text)]",
+                    correct && "border-[var(--color-primary)] bg-[var(--color-primary)] text-[var(--color-pure-white)]",
+                    wrong && "border-[var(--color-line)] text-[var(--color-text-faint)] line-through",
                   )}
                 >
                   {c}
@@ -76,15 +85,22 @@ export function TriviaGame({ game }: { game: Game }) {
       )}
 
       {phase === "done" && (
-        <div className="space-y-4 text-center">
-          <p className="text-xs uppercase tracking-wider text-[var(--color-text-muted)]">Final score</p>
-          <p className="font-display text-6xl tabular-nums text-[var(--color-accent)]">
-            {score}<span className="text-[var(--color-text-faint)]">/{triviaQuestions.length}</span>
+        <div className="mx-auto max-w-md space-y-6 py-12 text-center">
+          <p className="font-mono-label text-[10px] text-[var(--color-text-faint)]">
+            Final score
+          </p>
+          <p className="font-display text-7xl font-bold tabular-nums leading-none tracking-[-0.04em] md:text-8xl">
+            {score}
+            <span className="text-[var(--color-text-faint)]">/{triviaQuestions.length}</span>
           </p>
           {score >= 3 ? (
-            <p className="text-sm text-[var(--color-success)]">+{game.rewardPerWin} pts added.</p>
+            <p className="font-mono-label text-xs text-[var(--color-primary)]">
+              +{game.rewardPerWin} pts added.
+            </p>
           ) : (
-            <p className="text-sm text-[var(--color-text-muted)]">Get 3+ next time to claim points.</p>
+            <p className="font-mono-label text-xs text-[var(--color-text-muted)]">
+              Get 3+ next time to claim points.
+            </p>
           )}
           <Button
             onClick={() => {

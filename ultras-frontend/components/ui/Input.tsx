@@ -13,7 +13,7 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
     return (
       <label htmlFor={inputId} className="block">
         {label && (
-          <span className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-[var(--color-text-muted)]">
+          <span className="mb-2 block font-mono-label text-[10px] text-[var(--color-text-faint)]">
             {label}
           </span>
         )}
@@ -22,15 +22,20 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
           id={inputId}
           {...rest}
           className={cn(
-            "h-11 w-full rounded-xl border bg-[var(--color-surface-2)] px-4 text-sm text-[var(--color-text)] placeholder:text-[var(--color-text-faint)] focus:outline-none transition",
+            "h-11 w-full border-0 border-b bg-transparent px-0 py-2 text-base text-[var(--color-text)] placeholder:text-[var(--color-text-faint)] focus:outline-none transition",
             invalid
               ? "border-[var(--color-danger)] focus:border-[var(--color-danger)]"
-              : "border-[var(--color-line)] focus:border-[var(--color-primary)]",
+              : "border-[var(--color-line-strong)] focus:border-[var(--color-primary)]",
             className,
           )}
         />
         {helper && (
-          <span className={cn("mt-1.5 block text-xs", invalid ? "text-[var(--color-danger)]" : "text-[var(--color-text-faint)]")}>
+          <span
+            className={cn(
+              "mt-2 block font-mono-label text-[10px]",
+              invalid ? "text-[var(--color-danger)]" : "text-[var(--color-text-faint)]",
+            )}
+          >
             {helper}
           </span>
         )}

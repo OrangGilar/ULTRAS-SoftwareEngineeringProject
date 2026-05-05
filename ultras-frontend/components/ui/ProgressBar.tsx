@@ -10,11 +10,17 @@ export type ProgressBarProps = {
 
 const TONES = {
   primary: "bg-[var(--color-primary)]",
-  accent: "bg-[var(--color-accent)]",
+  accent: "bg-[var(--color-text)]",
   success: "bg-[var(--color-success)]",
 };
 
-export function ProgressBar({ value, max = 100, segmented, className, tone = "primary" }: ProgressBarProps) {
+export function ProgressBar({
+  value,
+  max = 100,
+  segmented,
+  className,
+  tone = "primary",
+}: ProgressBarProps) {
   if (segmented) {
     return (
       <div className={cn("flex gap-1", className)}>
@@ -24,8 +30,8 @@ export function ProgressBar({ value, max = 100, segmented, className, tone = "pr
             <div
               key={i}
               className={cn(
-                "h-1.5 flex-1 rounded-full transition-colors",
-                filled ? TONES[tone] : "bg-[var(--color-surface-3)]",
+                "h-1 flex-1 transition-colors",
+                filled ? TONES[tone] : "bg-[var(--color-line)]",
               )}
             />
           );
@@ -35,9 +41,9 @@ export function ProgressBar({ value, max = 100, segmented, className, tone = "pr
   }
   const pct = Math.max(0, Math.min(100, (value / max) * 100));
   return (
-    <div className={cn("h-1.5 w-full overflow-hidden rounded-full bg-[var(--color-surface-3)]", className)}>
+    <div className={cn("h-1 w-full bg-[var(--color-line)]", className)}>
       <div
-        className={cn("h-full rounded-full transition-[width] duration-500", TONES[tone])}
+        className={cn("h-full transition-[width] duration-500", TONES[tone])}
         style={{ width: `${pct}%` }}
       />
     </div>

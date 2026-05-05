@@ -31,24 +31,24 @@ export function ScorePicker({
   }) => {
     const v = value[side];
     return (
-      <div className="flex flex-col items-center gap-2">
-        <p className="text-xs font-semibold uppercase tracking-wider text-[var(--color-text-muted)]">
+      <div className="flex flex-col items-center gap-3">
+        <p className="font-mono-label text-[10px] text-[var(--color-text-faint)]">
           {label}
         </p>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-3">
           <button
             type="button"
             disabled={disabled || v <= min}
             onClick={() => onChange({ ...value, [side]: clamp(v - 1, min, max) })}
-            className="grid h-10 w-10 place-items-center rounded-full bg-[var(--color-surface-2)] text-[var(--color-text)] transition hover:bg-[var(--color-surface-3)] disabled:opacity-30"
+            className="grid h-10 w-10 place-items-center rounded-full border border-[var(--color-line)] text-[var(--color-text)] transition hover:border-[var(--color-text)] disabled:opacity-30"
             aria-label={`Decrease ${label} score`}
           >
-            <Minus size={18} />
+            <Minus size={16} />
           </button>
           <span
             className={cn(
-              "font-display text-5xl tabular-nums leading-none w-14 text-center",
-              v > 0 ? "text-[var(--color-text)]" : "text-[var(--color-text-faint)]"
+              "font-display w-14 text-center text-6xl font-bold tabular-nums leading-none tracking-[-0.04em]",
+              v > 0 ? "text-[var(--color-text)]" : "text-[var(--color-text-faint)]",
             )}
           >
             {v}
@@ -57,10 +57,10 @@ export function ScorePicker({
             type="button"
             disabled={disabled || v >= max}
             onClick={() => onChange({ ...value, [side]: clamp(v + 1, min, max) })}
-            className="grid h-10 w-10 place-items-center rounded-full bg-[var(--color-primary)] text-white transition hover:brightness-110 disabled:opacity-30"
+            className="grid h-10 w-10 place-items-center rounded-full bg-[var(--color-primary)] text-[var(--color-pure-white)] transition hover:bg-[var(--color-primary)]/90 disabled:opacity-30"
             aria-label={`Increase ${label} score`}
           >
-            <Plus size={18} />
+            <Plus size={16} />
           </button>
         </div>
       </div>
@@ -68,7 +68,7 @@ export function ScorePicker({
   };
 
   return (
-    <div className="grid grid-cols-2 gap-4 rounded-2xl border border-[var(--color-line)] bg-[var(--color-surface)] p-5">
+    <div className="grid grid-cols-2 gap-4 border-y border-[var(--color-line)] py-8">
       <Stepper side="home" label={homeLabel} />
       <Stepper side="away" label={awayLabel} />
     </div>

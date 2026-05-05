@@ -1,14 +1,21 @@
 import Link from "next/link";
 import type { Match } from "@/app/types";
 import { getClub } from "@/lib/mock/clubs";
-import { Badge } from "@/components/ui/Badge";
 import { ClubBadge } from "@/components/club/ClubBadge";
 import { formatKickoff } from "@/lib/utils";
+import { cn } from "@/lib/utils";
 
 export type MatchCardProps = {
   match: Match;
   userPrediction?: { home: number; away: number };
   variant?: "default" | "compact";
+};
+
+const STATUS_LABEL: Record<Match["status"], string> = {
+  live: "Live now",
+  finished: "Full time",
+  postponed: "Postponed",
+  scheduled: "Upcoming",
 };
 
 export function MatchCard({ match, userPrediction, variant = "default" }: MatchCardProps) {
@@ -21,63 +28,71 @@ export function MatchCard({ match, userPrediction, variant = "default" }: MatchC
       ? `/matches/${match.id}/result`
       : `/matches/${match.id}/predict`;
 
+  const isLive = match.status === "live";
+
   return (
     <Link
       href={href}
-      className="group block rounded-2xl border border-[var(--color-line)] bg-[var(--color-surface)] p-4 transition hover:-translate-y-0.5 hover:border-[var(--color-surface-3)] hover:shadow-lg hover:shadow-black/40"
+      className="group block border-b border-[var(--color-line)] py-5 transition hover:border-[var(--color-text)]"
     >
-      <div className="mb-3 flex items-center justify-between text-[10px] uppercase tracking-wider text-[var(--color-text-faint)]">
-        <Badge
-          variant={
-            match.status === "live"
-              ? "danger"
-              : match.status === "finished"
-              ? "neutral"
-              : match.status === "postponed"
-              ? "warning"
-              : "club"
-          }
+      <div className="mb-4 flex items-center justify-between font-mono-label text-[10px]">
+        <span
+          className={cn(
+            "inline-flex items-center gap-2",
+            isLive ? "text-[var(--color-primary)]" : "text-[var(--color-text-faint)]",
+          )}
         >
-          {match.status}
-        </Badge>
-        <span>MD {match.matchday}</span>
+          {isLive && (
+            <span className="relative grid h-2 w-2 place-items-center">
+              <span className="absolute inset-0 animate-ping rounded-full bg-[var(--color-primary)] opacity-60" />
+              <span className="h-1.5 w-1.5 rounded-full bg-[var(--color-primary)]" />
+            </span>
+          )}
+          {STATUS_LABEL[match.status]}
+        </span>
+        <span className="text-[var(--color-text-faint)]">MD {match.matchday}</span>
       </div>
 
-      <div className="grid grid-cols-3 items-center gap-2">
-        <div className="flex flex-col items-center gap-1.5">
+      <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-4">
+        <div className="flex items-center gap-3">
           <ClubBadge club={home} size={variant === "compact" ? "sm" : "md"} />
-          <span className="text-xs font-semibold">{home.shortName}</span>
+          <div className="min-w-0">
+            <p className="truncate text-sm font-bold tracking-tight">{home.shortName}</p>
+            <p className="truncate text-[10px] text-[var(--color-text-faint)]">{home.city}</p>
+          </div>
         </div>
 
         <div className="text-center">
           {match.status === "finished" && match.finalScore ? (
-            <p className="font-display text-2xl tabular-nums">
-              {match.finalScore.home}–{match.finalScore.away}
+            <p className="font-display text-4xl font-bold tabular-nums leading-none tracking-[-0.04em]">
+              {match.finalScore.home}<span className="text-[var(--color-text-faint)]">.</span>{match.finalScore.away}
             </p>
           ) : (
-            <p className="font-display text-lg text-[var(--color-text-muted)]">vs</p>
+            <p className="font-mono-label text-xs text-[var(--color-text-muted)]">
+              {formatKickoff(match.kickoffISO)}
+            </p>
           )}
-          <p className="mt-0.5 text-[10px] text-[var(--color-text-faint)]">
-            {formatKickoff(match.kickoffISO)}
-          </p>
         </div>
 
-        <div className="flex flex-col items-center gap-1.5">
+        <div className="flex items-center justify-end gap-3">
+          <div className="min-w-0 text-right">
+            <p className="truncate text-sm font-bold tracking-tight">{away.shortName}</p>
+            <p className="truncate text-[10px] text-[var(--color-text-faint)]">{away.city}</p>
+          </div>
           <ClubBadge club={away} size={variant === "compact" ? "sm" : "md"} />
-          <span className="text-xs font-semibold">{away.shortName}</span>
         </div>
       </div>
 
       {userPrediction && (
-        <div className="mt-3 flex items-center justify-center gap-2 rounded-lg border border-dashed border-[var(--color-line)] bg-[var(--color-surface-2)]/50 px-3 py-1.5 text-xs text-[var(--color-text-muted)]">
+        <div className="mt-4 flex items-baseline justify-between font-mono-label text-[10px] text-[var(--color-text-faint)]">
           <span>Your call</span>
-          <span className="font-display tabular-nums text-[var(--color-text)]">
-            {userPrediction.home}–{userPrediction.away}
+          <span className="font-display text-base font-bold tabular-nums tracking-[-0.02em] text-[var(--color-text)]">
+            {userPrediction.home}.{userPrediction.away}
           </span>
         </div>
       )}
 
-      <p className="mt-3 text-center text-xs text-[var(--color-text-muted)] transition group-hover:text-[var(--color-text)]">
+      <p className="mt-4 font-mono-label text-[10px] text-[var(--color-text-muted)] transition group-hover:text-[var(--color-primary)]">
         {match.status === "finished" ? "See your result →" : "Make a prediction →"}
       </p>
     </Link>

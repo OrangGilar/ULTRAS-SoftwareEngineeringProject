@@ -4,10 +4,8 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useLocalUser, useResetUser } from "@/hooks/useLocalUser";
-import { PageContainer } from "@/components/layout/PageContainer";
-import { Input } from "@/components/ui/Input";
+import { PageContainer, PageHeader } from "@/components/layout/PageContainer";
 import { Button } from "@/components/ui/Button";
-import { Card } from "@/components/ui/Card";
 import { ChevronLeft } from "lucide-react";
 
 export default function SettingsPage() {
@@ -18,32 +16,44 @@ export default function SettingsPage() {
   const [auto, setAuto] = useState(user.prefersAutoReveal);
 
   return (
-    <PageContainer width="sm" className="space-y-5">
-      <Link href="/profile">
-        <Button variant="ghost" leftIcon={<ChevronLeft size={16} />}>Back</Button>
+    <PageContainer width="sm" className="space-y-10">
+      <Link
+        href="/profile"
+        className="inline-flex items-center gap-1 font-mono-label text-[10px] text-[var(--color-text-muted)] transition hover:text-[var(--color-primary)]"
+      >
+        <ChevronLeft size={14} />
+        Back
       </Link>
 
-      <h1 className="font-display text-3xl">Settings</h1>
+      <PageHeader title={<>Settings.</>} />
 
-      <Card className="space-y-3 p-5">
-        <Input
-          label="Display name"
+      <section className="space-y-3 border-t border-[var(--color-line)] pt-6">
+        <label className="font-mono-label text-[10px] text-[var(--color-text-faint)]">
+          Display name
+        </label>
+        <input
+          type="text"
           value={name}
           onChange={(e) => setName(e.target.value)}
           placeholder="What should fellow ultras call you?"
+          className="w-full border-0 border-b border-[var(--color-line-strong)] bg-transparent px-0 py-2 font-display text-xl font-bold tracking-[-0.01em] placeholder:text-[var(--color-text-faint)] placeholder:font-normal focus:border-[var(--color-primary)] focus:outline-none"
         />
-        <Button
-          variant="primary"
-          onClick={() => update({ displayName: name.trim() || "Supporter" })}
-        >
-          Save name
-        </Button>
-      </Card>
-
-      <Card className="flex items-center justify-between p-5">
         <div>
-          <p className="text-sm font-semibold">Auto-reveal results</p>
-          <p className="text-xs text-[var(--color-text-muted)]">
+          <Button
+            variant="primary"
+            onClick={() => update({ displayName: name.trim() || "Supporter" })}
+          >
+            Save name
+          </Button>
+        </div>
+      </section>
+
+      <section className="flex items-center justify-between gap-4 border-y border-[var(--color-line)] py-6">
+        <div className="min-w-0">
+          <p className="font-display text-base font-bold tracking-[-0.01em]">
+            Auto-reveal results
+          </p>
+          <p className="prose-line mt-1 text-xs text-[var(--color-text-muted)]">
             Skip the tap-to-reveal step on result pages.
           </p>
         </div>
@@ -56,32 +66,41 @@ export default function SettingsPage() {
             setAuto(next);
             update({ prefersAutoReveal: next });
           }}
-          className={`relative h-6 w-11 rounded-full transition ${auto ? "bg-[var(--color-primary)]" : "bg-[var(--color-surface-3)]"}`}
+          className={`relative h-7 w-12 rounded-full transition ${
+            auto ? "bg-[var(--color-primary)]" : "bg-[var(--color-line)]"
+          }`}
         >
           <span
-            className={`absolute top-0.5 h-5 w-5 rounded-full bg-white transition ${auto ? "left-[22px]" : "left-0.5"}`}
+            className={`absolute top-0.5 h-6 w-6 rounded-full bg-[var(--color-pure-white)] transition ${
+              auto ? "left-[22px]" : "left-0.5"
+            }`}
           />
         </button>
-      </Card>
+      </section>
 
-      <Card className="p-5">
-        <p className="text-sm font-semibold">Switch club</p>
-        <p className="mt-1 text-xs text-[var(--color-text-muted)]">
-          You can re-run the recommendation quiz. There's a 30-day cooldown after switching — no swapping mid-season for trophies.
+      <section className="space-y-3 border-b border-[var(--color-line)] pb-6">
+        <p className="font-display text-base font-bold tracking-[-0.01em]">
+          Switch club
         </p>
-        <div className="mt-3">
+        <p className="prose-line text-xs text-[var(--color-text-muted)]">
+          You can re-run the recommendation quiz. There's a 30-day cooldown after switching.
+          No swapping mid-season for trophies.
+        </p>
+        <div>
           <Link href="/onboarding/quiz">
             <Button variant="secondary">Re-run quiz</Button>
           </Link>
         </div>
-      </Card>
+      </section>
 
-      <Card className="p-5">
-        <p className="text-sm font-semibold">Reset local data</p>
-        <p className="mt-1 text-xs text-[var(--color-text-muted)]">
+      <section className="space-y-3 border-b border-[var(--color-line)] pb-6">
+        <p className="font-display text-base font-bold tracking-[-0.01em]">
+          Reset local data
+        </p>
+        <p className="prose-line text-xs text-[var(--color-text-muted)]">
           Clears predictions, points, and adopted club from this device.
         </p>
-        <div className="mt-3">
+        <div>
           <Button
             variant="danger"
             onClick={() => {
@@ -92,7 +111,7 @@ export default function SettingsPage() {
             Reset everything
           </Button>
         </div>
-      </Card>
+      </section>
     </PageContainer>
   );
 }

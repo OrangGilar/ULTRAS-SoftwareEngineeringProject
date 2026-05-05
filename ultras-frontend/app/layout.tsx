@@ -2,13 +2,13 @@ import type { Metadata, Viewport } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Ultras — for the terraces",
+  title: "Ultras. For the terraces.",
   description:
-    "The fan engagement platform for Liga 1 supporters. Predict, debate, earn.",
+    "The fan engagement platform for Liga 1 supporters. Predict. Debate. Earn.",
 };
 
 export const viewport: Viewport = {
-  themeColor: "#0b0f14",
+  themeColor: "#ff1841",
 };
 
 export default function RootLayout({

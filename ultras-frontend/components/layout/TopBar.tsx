@@ -12,20 +12,20 @@ export function TopBar() {
   const club = getClub(user.clubId);
 
   return (
-    <header className="sticky top-0 z-40 border-b border-[var(--color-line)] bg-[var(--color-bg)]/85 backdrop-blur">
+    <header className="sticky top-0 z-40 border-b border-[var(--color-line)] bg-[var(--color-bg)]">
       <div className="mx-auto flex h-14 w-full max-w-screen-lg items-center justify-between px-4">
-        <Link href="/feed" className="flex items-center gap-2">
-          <span className="font-display text-2xl tracking-[0.18em] text-[var(--color-primary)]">
-            ULTRAS
+        <Link href="/feed" className="flex items-center gap-3">
+          <span className="font-display text-xl font-bold tracking-[-0.02em] text-[var(--color-primary)]">
+            ULTRAS.
           </span>
           {club && (
-            <span className="hidden items-center gap-1 rounded-full bg-[var(--color-surface-2)] px-2 py-0.5 text-xs text-[var(--color-text-muted)] sm:inline-flex">
+            <span className="hidden items-center gap-1.5 border-l border-[var(--color-line)] pl-3 font-mono-label text-[10px] text-[var(--color-text-muted)] sm:inline-flex">
               {club.logo ? (
                 <img src={club.logo} alt={club.name} className="h-4 w-4 object-contain" />
               ) : (
                 <span>{club.crestEmoji}</span>
               )}
-              <span className="font-medium text-[var(--color-text)]">{club.shortName}</span>
+              <span className="text-[var(--color-text)]">{club.shortName}</span>
             </span>
           )}
         </Link>
@@ -35,9 +35,9 @@ export function TopBar() {
           <button
             type="button"
             aria-label="Notifications"
-            className="relative grid h-9 w-9 place-items-center rounded-full bg-[var(--color-surface-2)] text-[var(--color-text-muted)] transition hover:text-[var(--color-text)]"
+            className="relative grid h-9 w-9 place-items-center rounded-[var(--radius-pill)] border border-[var(--color-line)] text-[var(--color-text-muted)] transition hover:border-[var(--color-text)] hover:text-[var(--color-text)]"
           >
-            <Bell size={16} />
+            <Bell size={15} />
             <span className="absolute right-1.5 top-1.5 h-1.5 w-1.5 rounded-full bg-[var(--color-primary)]" />
           </button>
           <Link href="/profile" aria-label="Profile">

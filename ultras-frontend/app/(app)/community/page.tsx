@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from "react";
 import { threads, threadsForClub } from "@/lib/mock/threads";
-import { PageContainer } from "@/components/layout/PageContainer";
+import { PageContainer, PageHeader } from "@/components/layout/PageContainer";
 import { Tabs } from "@/components/ui/Tabs";
 import { ThreadCard } from "@/components/community/ThreadCard";
 import { Composer } from "@/components/community/Composer";
@@ -22,19 +22,18 @@ export default function CommunityPage() {
   }, [filter, club]);
 
   return (
-    <PageContainer width="md" className="space-y-5">
-      <div>
-        <h1 className="font-display text-3xl">Community</h1>
-        <p className="mt-1 text-sm text-[var(--color-text-muted)]">
-          Loud takes welcome. Personal attacks aren't.
-        </p>
-      </div>
+    <PageContainer width="md" className="space-y-10">
+      <PageHeader
+        eyebrow="The terraces"
+        title={<>Community.</>}
+        lede="Loud takes welcome. Personal attacks aren't."
+      />
 
       <Tabs<Filter>
         value={filter}
         onChange={setFilter}
         options={[
-          { id: "club", label: club ? `My club · ${club.shortName}` : "My club" },
+          { id: "club", label: club ? `My club / ${club.shortName}` : "My club" },
           { id: "all", label: "All Liga 1" },
         ]}
       />
@@ -42,11 +41,11 @@ export default function CommunityPage() {
       <Composer />
 
       {filtered.length === 0 ? (
-        <div className="rounded-2xl border border-dashed border-[var(--color-line)] bg-[var(--color-surface)] p-8 text-center text-sm text-[var(--color-text-muted)]">
+        <div className="border border-dashed border-[var(--color-line)] py-16 text-center font-mono-label text-xs text-[var(--color-text-muted)]">
           No threads here yet. Be the first to say something.
         </div>
       ) : (
-        <div className="space-y-3">
+        <div>
           {filtered.map((t) => (
             <ThreadCard key={t.id} thread={t} />
           ))}

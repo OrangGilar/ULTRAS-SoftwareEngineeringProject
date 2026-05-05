@@ -23,9 +23,6 @@ export function ClubBadge({ club, size = "md", showLabel, className }: ClubBadge
           "grid place-items-center rounded-full ring-2 ring-[var(--color-line)]",
           SIZES[size],
         )}
-        style={{
-          background: `linear-gradient(135deg, ${club.colors[0]} 0%, ${club.colors[1]} 100%)`,
-        }}
         aria-label={club.name}
       >
         {club.logo ? (

@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from "react";
 import { matches } from "@/lib/mock/matches";
-import { PageContainer } from "@/components/layout/PageContainer";
+import { PageContainer, PageHeader } from "@/components/layout/PageContainer";
 import { Tabs } from "@/components/ui/Tabs";
 import { MatchCard } from "@/components/match/MatchCard";
 import { useLocalUser } from "@/hooks/useLocalUser";
@@ -31,13 +31,12 @@ export default function MatchesPage() {
     );
 
   return (
-    <PageContainer width="lg" className="space-y-5">
-      <div>
-        <h1 className="font-display text-3xl">Fixtures</h1>
-        <p className="mt-1 text-sm text-[var(--color-text-muted)]">
-          Predict, replay reveals, ride the season with the rest of the terrace.
-        </p>
-      </div>
+    <PageContainer width="lg" className="space-y-10">
+      <PageHeader
+        eyebrow="Liga 1 / Indonesia"
+        title={<>Fixtures.</>}
+        lede="Predict, replay reveals, ride the season with the rest of the terrace."
+      />
 
       <Tabs<Filter>
         value={filter}
@@ -50,13 +49,13 @@ export default function MatchesPage() {
       />
 
       {filtered.length === 0 ? (
-        <div className="rounded-2xl border border-dashed border-[var(--color-line)] bg-[var(--color-surface)] p-8 text-center text-sm text-[var(--color-text-muted)]">
+        <div className="border border-dashed border-[var(--color-line)] py-16 text-center font-mono-label text-xs text-[var(--color-text-muted)]">
           {filter === "live"
             ? "No live matches right now. Check back at kickoff."
             : "Nothing here yet."}
         </div>
       ) : (
-        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 sm:gap-x-8 xl:grid-cols-3">
           {filtered.map((m) => (
             <MatchCard
               key={m.id}
