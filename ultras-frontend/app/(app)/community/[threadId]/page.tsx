@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { getThread } from "@/lib/mock/threads";
+import { getThread } from "@/lib";
 import { getClub } from "@/lib/mock/clubs";
 import { PageContainer } from "@/components/layout/PageContainer";
 import { Avatar } from "@/components/ui/Avatar";

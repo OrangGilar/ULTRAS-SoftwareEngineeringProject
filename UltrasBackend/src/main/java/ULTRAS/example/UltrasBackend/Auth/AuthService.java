@@ -9,6 +9,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Locale;
+
 @Service
 @RequiredArgsConstructor
 public class AuthService {
@@ -22,13 +24,20 @@ public class AuthService {
         if (userRepo.existsByEmail(req.email())) {
             throw new ApiException(HttpStatus.CONFLICT, "Email already registered");
         }
-        if (userRepo.existsByUsername(req.username())) {
+
+        // If the frontend didn't send a username, derive one from displayName +
+        // a numeric suffix until it's unique. Cheap, predictable, no extra round trip.
+        String username = (req.username() == null || req.username().isBlank())
+                ? deriveUniqueUsername(req.displayName())
+                : req.username();
+
+        if (userRepo.existsByUsername(username)) {
             throw new ApiException(HttpStatus.CONFLICT, "Username already taken");
         }
 
         User user = User.builder()
                 .email(req.email())
-                .username(req.username())
+                .username(username)
                 .password(passwordEncoder.encode(req.password()))
                 .city(req.city())
                 .tier(User.Tier.ROOKIE)
@@ -60,5 +69,21 @@ public class AuthService {
                 user.getTier().name(),
                 user.getXpTotal()
         );
+    }
+
+    /** Lowercase, strip non-alphanum, append a 4-digit suffix until unique. */
+    private String deriveUniqueUsername(String displayName) {
+        String base = displayName.toLowerCase(Locale.ROOT).replaceAll("[^a-z0-9]+", "");
+        if (base.isEmpty()) base = "supporter";
+        if (base.length() > 24) base = base.substring(0, 24);
+
+        // Try the base first, then base + a few random suffixes.
+        if (!userRepo.existsByUsername(base)) return base;
+        for (int i = 0; i < 8; i++) {
+            String candidate = base + (1000 + (int)(Math.random() * 9000));
+            if (!userRepo.existsByUsername(candidate)) return candidate;
+        }
+        // Extremely unlikely fallback.
+        return base + System.currentTimeMillis();
     }
 }

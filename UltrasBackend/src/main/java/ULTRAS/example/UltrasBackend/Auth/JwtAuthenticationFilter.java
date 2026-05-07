@@ -18,7 +18,9 @@ import java.util.UUID;
 
 /**
  * Reads the Authorization header, verifies the JWT, and stores the user's UUID
- * as the authentication principal. Controllers can pull it via @AuthenticationPrincipal.
+ * BOTH in the SecurityContext (so @AuthenticationPrincipal works) AND as a
+ * request attribute named "userId" (so existing controllers using
+ * @RequestAttribute UUID userId keep working without churn).
  */
 @Component
 @RequiredArgsConstructor
@@ -26,6 +28,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private static final String HEADER = "Authorization";
     private static final String PREFIX = "Bearer ";
+    public  static final String USER_ID_ATTR = "userId";
 
     private final JwtService jwtService;
 
@@ -50,8 +53,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
                 UUID userId = jwtService.extractUserId(token);
 
-                // No authorities for now — every authenticated user has the same role.
-                // Add roles as a JWT claim later if you need ROLE_ADMIN etc.
+                // Make @RequestAttribute UUID userId resolve. This is the line your
+                // existing controllers depend on — without it they throw 400.
+                request.setAttribute(USER_ID_ATTR, userId);
+
                 UsernamePasswordAuthenticationToken auth =
                         new UsernamePasswordAuthenticationToken(
                                 userId,
@@ -62,7 +67,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 SecurityContextHolder.getContext().setAuthentication(auth);
             }
         } catch (Exception ignored) {
-            // Bad token → just leave context unauthenticated; SecurityConfig handles 401.
             SecurityContextHolder.clearContext();
         }
 

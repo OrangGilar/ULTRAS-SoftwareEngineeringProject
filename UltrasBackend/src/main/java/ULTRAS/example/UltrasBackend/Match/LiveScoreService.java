@@ -1,7 +1,6 @@
 package ULTRAS.example.UltrasBackend.Match;
 
 import ULTRAS.example.UltrasBackend.Common.ApiException;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,6 +38,8 @@ public class LiveScoreService {
     @Value("${apifootball.cache.live-ttl-seconds:60}")
     private long liveTtlSeconds;
 
+    // ===== Original (backend-shape) methods =====
+
     @Transactional
     public List<MatchDtos.MatchResponse> getLiga1Fixtures() {
         refreshIfStale(liga1LeagueId, liga1Season);
@@ -60,6 +61,53 @@ public class LiveScoreService {
                 .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Match not found"));
         return MatchDtos.MatchResponse.from(m);
     }
+
+    // ===== Frontend-shape variants =====
+
+    /**
+     * Returns Liga 1 fixtures in the shape app/types/index.ts expects.
+     * Same caching/refresh policy as getLiga1Fixtures().
+     */
+    @Transactional
+    public List<MatchDtos.FrontendMatch> getLiga1FixturesForFrontend() {
+        refreshIfStale(liga1LeagueId, liga1Season);
+        return matchRepo.findByLeagueIdOrderByKickoffAtAsc(liga1LeagueId)
+                .stream().map(MatchDtos.FrontendMatch::from).toList();
+    }
+
+    @Transactional
+    public List<MatchDtos.FrontendMatch> getLiveLiga1ForFrontend() {
+        refreshIfStale(liga1LeagueId, liga1Season);
+        return matchRepo.findLive().stream()
+                .filter(m -> m.getLeagueId() != null && m.getLeagueId() == liga1LeagueId)
+                .map(MatchDtos.FrontendMatch::from)
+                .toList();
+    }
+
+    /**
+     * Frontend IDs are the API fixture ID as a string (see FrontendMatch.from).
+     * We accept that string here and resolve it back to an entity.
+     */
+    public MatchDtos.FrontendMatch getByFrontendIdForFrontend(String id) {
+        MatchEntity m;
+        try {
+            // Frontend IDs are numeric (API fixture ID)
+            long apiId = Long.parseLong(id);
+            m = matchRepo.findByApiFixtureId(apiId)
+                    .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Match not found"));
+        } catch (NumberFormatException ex) {
+            // Allow lookup by internal UUID too, as a graceful fallback.
+            try {
+                m = matchRepo.findById(UUID.fromString(id))
+                        .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Match not found"));
+            } catch (IllegalArgumentException iae) {
+                throw new ApiException(HttpStatus.BAD_REQUEST, "Invalid match id: " + id);
+            }
+        }
+        return MatchDtos.FrontendMatch.from(m);
+    }
+
+    // ===== Sync =====
 
     @Transactional
     public int forceSync() { return syncFromApi(liga1LeagueId, liga1Season); }

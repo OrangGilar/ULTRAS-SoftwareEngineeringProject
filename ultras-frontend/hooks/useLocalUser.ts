@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useSyncExternalStore } from "react";
-import type { LocalUser, Prediction } from "@/app/types";
+import type { LocalUser, Prediction } from "../app/types";
 
 const STORAGE_KEY = "ultras:user:v1";
 
