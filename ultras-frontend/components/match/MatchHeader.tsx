@@ -8,7 +8,7 @@ const STATUS_LABEL: Record<Match["status"], string> = {
   live: "Live now",
   finished: "Full time",
   postponed: "Postponed",
-  scheduled: "Upcoming",
+  upcoming: "Upcoming",
 };
 
 export function MatchHeader({ match, hideScore }: { match: Match; hideScore?: boolean }) {
