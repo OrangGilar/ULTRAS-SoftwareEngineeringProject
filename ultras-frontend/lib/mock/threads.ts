@@ -1,5 +1,5 @@
 import type { Thread } from "@/app/types";
-import { getThread } from "@/lib/mock/threads";
+
 
 export const threads: Thread[] = [
   {
