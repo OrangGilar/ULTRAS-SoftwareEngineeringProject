@@ -26,6 +26,7 @@ export function useMatches(filter: "all" | "live" = "all") {
 
   useEffect(() => {
     let cancelled = false;
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setState(LOADING);
 
     const fetcher = filter === "live" ? getLiveMatches : getMatches;
@@ -52,6 +53,7 @@ export function useMatch(id: string | undefined) {
   useEffect(() => {
     if (!id) return;
     let cancelled = false;
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setState(LOADING);
 
     getMatch(id)

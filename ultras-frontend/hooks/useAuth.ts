@@ -12,29 +12,43 @@ import {
   type RegisterPayload,
 } from "@/lib/api";
 
-/**
- * Reactive wrapper around the JWT persisted in localStorage. Components that
- * call login/register get a fresh `auth` value back through useSyncExternalStore
- * without prop drilling.
- *
- * This is intentionally separate from useLocalUser — auth identity (who you are
- * to the server) is a different concern from user preferences (predictions,
- * cosmetics, points). Mixing them made the storage migration painful last time.
- */
-
 const STORAGE_KEY = "ultras:auth:v1";
 
 const listeners = new Set<() => void>();
 
-function notify() {
-  listeners.forEach((l) => l());
+
+
+let cachedRaw: string | null = null;
+let cachedAuth: AuthResponse | null = null;
+
+function getCachedSnapshot(): AuthResponse | null {
+  if (typeof window === "undefined") return null;
+
+  const raw = window.localStorage.getItem(STORAGE_KEY);
+  if (raw === cachedRaw) return cachedAuth;
+
+  cachedRaw = raw;
+  cachedAuth = raw ? (() => {
+    try { return JSON.parse(raw) as AuthResponse; } catch { return null; }
+  })() : null;
+  return cachedAuth;
 }
+
+/** Force the next getCachedSnapshot() call to re-read and re-parse. */
+function invalidate() {
+  cachedRaw = null;
+  cachedAuth = null;
+}
+
+// ---------- Subscription ----------
 
 function subscribe(listener: () => void) {
   listeners.add(listener);
-  // Cross-tab sync: if the user logs in/out in another tab, this one notices.
   const onStorage = (e: StorageEvent) => {
-    if (e.key === STORAGE_KEY) listener();
+    if (e.key === STORAGE_KEY) {
+      invalidate();
+      listener();
+    }
   };
   if (typeof window !== "undefined") {
     window.addEventListener("storage", onStorage);
@@ -47,34 +61,44 @@ function subscribe(listener: () => void) {
   };
 }
 
-function getServerSnapshot(): AuthResponse | null {
-  return null; // SSR sees logged-out state; client hydrates with the real value.
+function notifyAll() {
+  listeners.forEach((l) => l());
 }
 
+function getServerSnapshot(): AuthResponse | null {
+  // SSR / pre-hydration: always logged-out. Stable null is fine.
+  return null;
+}
+
+// ---------- Hook ----------
+
 export function useAuth() {
-  const auth = useSyncExternalStore(subscribe, getStoredAuth, getServerSnapshot);
+  const auth = useSyncExternalStore(subscribe, getCachedSnapshot, getServerSnapshot);
 
   const login = useCallback(async (payload: LoginPayload) => {
     const res = await apiLogin(payload);
-    notify();
+    invalidate();
+    notifyAll();
     return res;
   }, []);
 
   const register = useCallback(async (payload: RegisterPayload) => {
     const res = await apiRegister(payload);
-    notify();
+    invalidate();
+    notifyAll();
     return res;
   }, []);
 
   const logout = useCallback(() => {
     apiLogout();
-    notify();
+    invalidate();
+    notifyAll();
   }, []);
 
-  // Manual setter for unusual flows (e.g. token refresh, social login callback).
   const setAuth = useCallback((next: AuthResponse | null) => {
-    setStoredAuth(next);
-    notify();
+    setStoredAuth(next as Parameters<typeof setStoredAuth>[0]);
+    invalidate();
+    notifyAll();
   }, []);
 
   return {
@@ -86,3 +110,8 @@ export function useAuth() {
     setAuth,
   };
 }
+
+// `getStoredAuth` is still used by the axios interceptor in lib/api/client.ts —
+// that path doesn't go through React, so the un-cached version is fine there.
+// We export it here only so this module also has access if needed.
+export { getStoredAuth };

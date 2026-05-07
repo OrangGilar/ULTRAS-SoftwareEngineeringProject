@@ -14,7 +14,6 @@ import java.time.OffsetDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import ULTRAS.example.UltrasBackend.Community.CommunityRepositories.*;
 import static ULTRAS.example.UltrasBackend.Community.CommunityDtos.*;
 
 @Service
