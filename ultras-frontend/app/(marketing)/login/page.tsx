@@ -4,23 +4,43 @@ import Link from "next/link";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/Button";
+import { useAuth } from "@/hooks/useAuth";
+import { ApiError } from "@/lib/api";
 
 export default function LoginPage() {
   const router = useRouter();
+  const { login } = useAuth();
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
-  const canSubmit = email.trim().length > 0 && password.length > 0;
+  const canSubmit = email.trim().length > 0 && password.length > 0 && !submitting;
 
-  const onSubmit = (e: React.FormEvent) => {
+  const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!canSubmit) return;
+
     setSubmitting(true);
-    setTimeout(() => {
-      setSubmitting(false);
+    setErrorMsg(null);
+
+    try {
+      await login({ email: email.trim(), password });
       router.push("/feed");
-    }, 600);
+    } catch (err) {
+      // ApiError gives us the backend's exact message. Anything else is unexpected.
+      if (err instanceof ApiError) {
+        setErrorMsg(
+          err.status === 0
+            ? "Couldn't reach the server. Is the backend running on port 8080?"
+            : err.message,
+        );
+      } else {
+        setErrorMsg("Something went wrong. Try again.");
+      }
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -83,6 +103,15 @@ export default function LoginPage() {
             className="w-full border-0 border-b border-[var(--color-line-strong)] bg-transparent px-0 py-2 text-base text-[var(--color-text)] placeholder:text-[var(--color-text-faint)] focus:border-[var(--color-primary)] focus:outline-none"
           />
         </div>
+
+        {errorMsg && (
+          <div
+            role="alert"
+            className="border-l-2 border-[var(--color-primary)] pl-3 font-mono-label text-[11px] text-[var(--color-primary)]"
+          >
+            {errorMsg}
+          </div>
+        )}
 
         <Button
           fullWidth

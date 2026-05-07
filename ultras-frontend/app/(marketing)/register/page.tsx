@@ -4,29 +4,61 @@ import Link from "next/link";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/Button";
+import { useAuth } from "@/hooks/useAuth";
+import { ApiError } from "@/lib/api";
 
 export default function RegisterPage() {
   const router = useRouter();
+  const { register } = useAuth();
+
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [agreed, setAgreed] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
+  // fieldErrors mirrors the Spring Boot validation response so we can highlight
+  // individual fields. errorMsg covers the rest (409 conflicts, 5xx, network).
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
+
   const canSubmit =
     name.trim().length > 1 &&
     email.includes("@") &&
     password.length >= 8 &&
-    agreed;
+    agreed &&
+    !submitting;
 
-  const onSubmit = (e: React.FormEvent) => {
+  const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!canSubmit) return;
+
     setSubmitting(true);
-    setTimeout(() => {
-      setSubmitting(false);
+    setErrorMsg(null);
+    setFieldErrors({});
+
+    try {
+      await register({
+        displayName: name.trim(),
+        email: email.trim(),
+        password,
+        // username and city left unset — backend derives a username from displayName.
+      });
       router.push("/onboarding/quiz");
-    }, 700);
+    } catch (err) {
+      if (err instanceof ApiError) {
+        if (err.status === 0) {
+          setErrorMsg("Couldn't reach the server. Is the backend running on port 8080?");
+        } else if (err.fieldErrors && Object.keys(err.fieldErrors).length > 0) {
+          setFieldErrors(err.fieldErrors);
+        } else {
+          setErrorMsg(err.message);
+        }
+      } else {
+        setErrorMsg("Something went wrong. Try again.");
+      }
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -63,6 +95,11 @@ export default function RegisterPage() {
             placeholder="What fellow ultras call you"
             className="w-full border-0 border-b border-[var(--color-line-strong)] bg-transparent px-0 py-2 font-display text-xl font-bold tracking-[-0.01em] placeholder:font-normal placeholder:text-base placeholder:text-[var(--color-text-faint)] focus:border-[var(--color-primary)] focus:outline-none"
           />
+          {fieldErrors.displayName && (
+            <p className="font-mono-label text-[10px] text-[var(--color-primary)]">
+              {fieldErrors.displayName}
+            </p>
+          )}
         </div>
 
         <div className="space-y-2">
@@ -82,6 +119,11 @@ export default function RegisterPage() {
             placeholder="supporter@ultras.id"
             className="w-full border-0 border-b border-[var(--color-line-strong)] bg-transparent px-0 py-2 text-base text-[var(--color-text)] placeholder:text-[var(--color-text-faint)] focus:border-[var(--color-primary)] focus:outline-none"
           />
+          {fieldErrors.email && (
+            <p className="font-mono-label text-[10px] text-[var(--color-primary)]">
+              {fieldErrors.email}
+            </p>
+          )}
         </div>
 
         <div className="space-y-2">
@@ -105,6 +147,11 @@ export default function RegisterPage() {
           <p className="font-mono-label text-[10px] text-[var(--color-text-faint)]">
             8+ characters. Mix it up.
           </p>
+          {fieldErrors.password && (
+            <p className="font-mono-label text-[10px] text-[var(--color-primary)]">
+              {fieldErrors.password}
+            </p>
+          )}
         </div>
 
         <label className="flex cursor-pointer items-start gap-3 pt-2">
@@ -129,9 +176,18 @@ export default function RegisterPage() {
             )}
           </span>
           <span className="prose-line text-xs leading-snug text-[var(--color-text-muted)]">
-            I'll keep it civil. No personal attacks, no slurs, no flares indoors.
+            I&apos;ll keep it civil. No personal attacks, no slurs, no flares indoors.
           </span>
         </label>
+
+        {errorMsg && (
+          <div
+            role="alert"
+            className="border-l-2 border-[var(--color-primary)] pl-3 font-mono-label text-[11px] text-[var(--color-primary)]"
+          >
+            {errorMsg}
+          </div>
+        )}
 
         <Button
           fullWidth
