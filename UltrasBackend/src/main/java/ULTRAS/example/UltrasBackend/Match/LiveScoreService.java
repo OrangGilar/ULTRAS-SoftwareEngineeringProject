@@ -107,6 +107,24 @@ public class LiveScoreService {
         return MatchDtos.FrontendMatch.from(m);
     }
 
+    /**
+     * The dataset is small (one league season, ~306 fixtures) so an in-memory
+     * filter beats adding a slug column and recomputing it on every sync.
+     */
+    @Transactional
+    public List<MatchDtos.FrontendMatch> getMatchesForTeamSlug(String slug) {
+        if (slug == null || slug.isBlank()) {
+            throw new ApiException(HttpStatus.BAD_REQUEST, "Team slug is required");
+        }
+        refreshIfStale(liga1LeagueId, liga1Season);
+        String target = slug.toLowerCase();
+        return matchRepo.findByLeagueIdOrderByKickoffAtAsc(liga1LeagueId).stream()
+                .filter(m -> target.equals(MatchDtos.teamSlug(m.getHomeTeamName()))
+                        || target.equals(MatchDtos.teamSlug(m.getAwayTeamName())))
+                .map(MatchDtos.FrontendMatch::from)
+                .toList();
+    }
+
     // ===== Sync =====
 
     @Transactional

@@ -38,6 +38,10 @@ public class SecurityConfig {
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/matches/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/threads/**").permitAll()
+                        // Public reads for league table + team-scoped fixture lists.
+                        // POST /api/standings/sync stays auth-required (handled by anyRequest).
+                        .requestMatchers(HttpMethod.GET, "/api/teams/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/standings").permitAll()
                         .requestMatchers("/error").permitAll()
                         .anyRequest().authenticated()
                 )
