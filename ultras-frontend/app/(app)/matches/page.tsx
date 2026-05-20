@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useMemo } from "react";
+import Link from "next/link";
 import { PageContainer, PageHeader } from "@/components/layout/PageContainer";
 import { Tabs } from "@/components/ui/Tabs";
 import { MatchCard } from "@/components/match/MatchCard";
@@ -44,6 +45,16 @@ export default function MatchesPage() {
         eyebrow="Liga 1 / Indonesia"
         title={<>Fixtures.</>}
         lede="Predict, replay reveals, ride the season with the rest of the terrace."
+        action={
+          // Entry point to the league table. Kept in the header (not BottomNav)
+          // because nav is full and "Table" lives logically next to fixtures.
+          <Link
+            href="/table"
+            className="font-mono-label text-[10px] text-[var(--color-text-muted)] transition hover:text-[var(--color-primary)]"
+          >
+            View table →
+          </Link>
+        }
       />
 
       <Tabs<Filter>
