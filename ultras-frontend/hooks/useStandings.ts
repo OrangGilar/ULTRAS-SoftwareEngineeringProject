@@ -32,10 +32,10 @@ export function useStandings() {
     setState(LOADING);
 
     getStandings()
-      .then((data) => {
+      .then((data: any) => {
         if (!cancelled) setState({ status: "success", data, error: null });
       })
-      .catch((err) => {
+      .catch((err: any) => {
         if (!cancelled) {
           const apiErr = err instanceof ApiError ? err : new ApiError(String(err), 0);
           setState({ status: "error", data: null, error: apiErr });
@@ -58,10 +58,10 @@ export function useTeamStanding(slug: string | undefined) {
     setState(LOADING);
 
     getTeamStanding(slug)
-      .then((data) => {
+      .then((data: any) => {
         if (!cancelled) setState({ status: "success", data, error: null });
       })
-      .catch((err) => {
+      .catch((err: any) => {
         if (!cancelled) {
           const apiErr = err instanceof ApiError ? err : new ApiError(String(err), 0);
           setState({ status: "error", data: null, error: apiErr });
@@ -84,10 +84,10 @@ export function useTeamMatches(slug: string | undefined) {
     setState(LOADING);
 
     getTeamMatches(slug)
-      .then((data) => {
+      .then((data: any) => {
         if (!cancelled) setState({ status: "success", data, error: null });
       })
-      .catch((err) => {
+      .catch((err: any) => {
         if (!cancelled) {
           const apiErr = err instanceof ApiError ? err : new ApiError(String(err), 0);
           setState({ status: "error", data: null, error: apiErr });

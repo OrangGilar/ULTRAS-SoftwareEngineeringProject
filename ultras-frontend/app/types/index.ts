@@ -113,3 +113,20 @@ export type Game = {
   description: string;
   rewardPerWin: number;
 };
+
+
+export type TeamStanding = {
+  rank: number;
+  teamId: string;
+  teamName: string;
+  teamLogo?: string;
+  played: number;
+  win: number;
+  draw: number;
+  lose: number;
+  goalsFor: number;
+  goalsAgainst: number;
+  goalsDiff: number;
+  points: number;
+  form?: string;
+};
