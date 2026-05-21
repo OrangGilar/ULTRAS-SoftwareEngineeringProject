@@ -62,11 +62,20 @@ export type LocalUser = {
   prefersAutoReveal: boolean;
 };
 
+export type QuizCity = { id: string; label: string; weights: Partial<QuizWeights> };
+
+export type QuizProvince = {
+  id: string;
+  label: string;
+  cities: QuizCity[];
+};
+
 export type QuizQuestion = {
   id: string;
   prompt: string;
   helper?: string;
   choices: { id: string; label: string; emoji?: string; weights: Partial<QuizWeights> }[];
+  provinces?: QuizProvince[];
 };
 
 export type QuizWeights = {

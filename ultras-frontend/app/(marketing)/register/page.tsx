@@ -38,10 +38,10 @@ export default function RegisterPage() {
         <h1 className="font-display text-5xl font-bold leading-[0.95] tracking-[-0.04em] md:text-6xl">
           Join the
           <br />
-          <span className="text-[var(--color-primary)]">terrace</span>.
+          <span className="text-[var(--color-primary)]">community</span>.
         </h1>
         <p className="prose-line text-base text-[var(--color-text-muted)]">
-          Build your scarf collection in points. Argue tactics with strangers. Find a club to lose your weekends to.
+          Create an account to start predicting matches, earning points, and joining the discussion.
         </p>
       </header>
 
@@ -129,7 +129,7 @@ export default function RegisterPage() {
             )}
           </span>
           <span className="prose-line text-xs leading-snug text-[var(--color-text-muted)]">
-            I'll keep it civil. No personal attacks, no slurs, no flares indoors.
+            I agree to the terms and conditions.
           </span>
         </label>
 
