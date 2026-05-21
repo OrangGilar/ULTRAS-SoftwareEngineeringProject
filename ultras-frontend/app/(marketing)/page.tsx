@@ -83,7 +83,11 @@ export default function LandingPage() {
       </section>
 
       <section className="mx-auto w-full max-w-screen-xl px-6 py-24 md:py-32">
-        <div className="font-mono-label text-xs text-[var(--color-text-muted)]">
+        {/* "The rituals" — Playfair Display italic, much larger */}
+        <div
+          style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
+          className="text-4xl italic text-[var(--color-text-muted)] md:text-6xl"
+        >
           The rituals
         </div>
 
@@ -97,7 +101,11 @@ export default function LandingPage() {
                   : "grid grid-cols-1 gap-6 py-10 md:grid-cols-12 md:py-16 md:[&>*:first-child]:col-start-2"
               }
             >
-              <div className="font-mono-label text-sm text-[var(--color-text-faint)] md:col-span-2">
+              {/* Number — Bebas Neue, big, scarlet */}
+              <div
+                style={{ fontFamily: "'Bebas Neue', Impact, sans-serif" }}
+                className="text-6xl leading-none text-[var(--color-primary)] md:col-span-2 md:text-8xl"
+              >
                 {r.no}
               </div>
               <h3 className="font-display text-5xl font-bold leading-none tracking-tight md:col-span-4 md:text-7xl">
