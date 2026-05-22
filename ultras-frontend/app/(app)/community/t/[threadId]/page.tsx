@@ -18,7 +18,7 @@ import {
   ApiError,
 } from "@/lib/api";
 import { useAuth } from "@/hooks/useAuth";
-import { usePollingFetch } from "@/hooks/Usepollingfetch";
+import { usePollingFetch } from "@/hooks/usePollingFetch";
 
 /**
  * Thread detail page.
@@ -185,6 +185,8 @@ export default function ThreadPage({
   const { thread, replies } = data;
   const authorClub = getClub(thread.authorClubId);
   const threadClub = getClub(thread.clubId);
+  const backHref = threadClub ? `/community/c/${threadClub.id}` : "/community/c/general";
+  const backLabel = threadClub ? `Back to ${threadClub.shortName}` : "Back to General";
 
   const viewerId = auth?.userId;
   const isThreadOwner = !!viewerId && viewerId === thread.authorId;
@@ -192,11 +194,11 @@ export default function ThreadPage({
   return (
     <PageContainer width="md" className="space-y-10">
       <Link
-        href="/community"
+        href={backHref}
         className="inline-flex items-center gap-1 font-mono-label text-[10px] text-[var(--color-text-muted)] transition hover:text-[var(--color-primary)]"
       >
         <ChevronLeft size={14} />
-        Back to community
+        {backLabel}
       </Link>
 
       <article className="space-y-5 border-b border-[var(--color-line)] pb-8">

@@ -53,6 +53,14 @@ public class CommunityController {
         return ResponseEntity.ok(service.create(userId, req));
     }
 
+    @PatchMapping("/{id}/move")
+    public ResponseEntity<ThreadResponse> move(
+            @PathVariable UUID id,
+            @RequestBody MoveThreadRequest req,
+            @RequestAttribute UUID userId) {
+        return ResponseEntity.ok(service.move(id, userId, req));
+    }
+
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(
             @PathVariable UUID id,

@@ -3,9 +3,9 @@
 import Link from "next/link";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowBigUp, Trash2 } from "lucide-react";
+import { ArrowBigUp, Trash2, MoveRight } from "lucide-react";
 import type { ApiThread } from "@/lib/api";
-import { toggleUpvote, deleteThread, ApiError } from "@/lib/api";
+import { toggleUpvote, deleteThread, moveThread, ApiError } from "@/lib/api";
 import { Avatar } from "@/components/ui/Avatar";
 import { getClub } from "@/lib/mock/clubs";
 import { useAuth } from "@/hooks/useAuth";
@@ -42,6 +42,7 @@ export function ThreadCard({
   const [optimisticCount, setOptimisticCount] = useState(thread.upvotes);
   const [busy, setBusy] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [moving, setMoving] = useState(false);
 
   const isOwner = !!auth?.userId && auth.userId === thread.authorId;
 
@@ -74,6 +75,22 @@ export function ThreadCard({
       console.error(msg);
     } finally {
       setBusy(false);
+    }
+  };
+
+  const onMoveToGeneralClick = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (moving) return;
+    if (!window.confirm("Move this thread to General?")) return;
+    setMoving(true);
+    try {
+      await moveThread(thread.id, null);
+      onDeleted?.(); // re-fetch or splice — same callback as delete
+    } catch (err) {
+      const msg = err instanceof ApiError ? err.message : "Move failed";
+      console.error(msg);
+      setMoving(false);
     }
   };
 
@@ -116,7 +133,7 @@ export function ThreadCard({
         <span className="font-display text-sm font-bold tabular-nums">{optimisticCount}</span>
       </button>
 
-      <Link href={`/community/${thread.id}`} className="flex-1 min-w-0">
+      <Link href={`/community/t/${thread.id}`} className="flex-1 min-w-0">
         <div className="mb-2 flex items-center gap-2 font-mono-label text-[10px] text-[var(--color-text-faint)]">
           <Avatar
             name={thread.authorName}
@@ -144,16 +161,30 @@ export function ThreadCard({
             {thread.replyCount} {thread.replyCount === 1 ? "reply" : "replies"}
           </span>
           {isOwner && (
-            <button
-              type="button"
-              onClick={onDeleteClick}
-              disabled={deleting}
-              aria-label="Delete thread"
-              className="ml-auto inline-flex items-center gap-1 transition hover:text-[var(--color-primary)] disabled:opacity-40"
-            >
-              <Trash2 size={11} />
-              <span>{deleting ? "Deleting…" : "Delete"}</span>
-            </button>
+            <span className="ml-auto flex items-center gap-3">
+              {thread.clubId && (
+                <button
+                  type="button"
+                  onClick={onMoveToGeneralClick}
+                  disabled={moving}
+                  aria-label="Move to General"
+                  className="inline-flex items-center gap-1 transition hover:text-[var(--color-primary)] disabled:opacity-40"
+                >
+                  <MoveRight size={11} />
+                  <span>{moving ? "Moving…" : "Move to General"}</span>
+                </button>
+              )}
+              <button
+                type="button"
+                onClick={onDeleteClick}
+                disabled={deleting}
+                aria-label="Delete thread"
+                className="inline-flex items-center gap-1 transition hover:text-[var(--color-primary)] disabled:opacity-40"
+              >
+                <Trash2 size={11} />
+                <span>{deleting ? "Deleting…" : "Delete"}</span>
+              </button>
+            </span>
           )}
         </div>
       </Link>

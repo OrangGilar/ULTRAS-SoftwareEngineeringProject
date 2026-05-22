@@ -9,6 +9,7 @@ export {
   getThread,
   createThread,
   deleteThread,
+  moveThread,
   toggleUpvote,
   createReply,
   deleteReply,

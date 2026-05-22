@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/Button";
 import { Plus } from "lucide-react";
 import { createThread, ApiError } from "@/lib/api";
 import { useAuth } from "@/hooks/useAuth";
+import { getClub } from "@/lib/mock/clubs";
 
 /**
  * Composer for new threads. Posts to POST /api/threads and bubbles a refetch
@@ -13,17 +14,26 @@ import { useAuth } from "@/hooks/useAuth";
  *
  * Anonymous users get bounced to /login on first interaction — composing a
  * thread without an account isn't supported.
+ *
+ * Two modes for the topic tag:
+ *   - `defaultClubTag` + `lockedClubTag = false`: pre-fills but user can change
+ *     (in practice the picker UI isn't built yet — falls through as the default)
+ *   - `lockedClubTag = true`: thread is forced onto `defaultClubTag` and we
+ *     surface a small "Posting in X" header. Used inside /community/c/[clubId].
  */
 export function Composer({
   onPosted,
   defaultClubTag,
   authorClubTag,
+  lockedClubTag = false,
 }: {
   onPosted?: () => void;
   /** Optional: pre-tag the thread with the user's currently-filtered club. */
   defaultClubTag?: string;
   /** The author's stated club affiliation (from useLocalUser.clubId). */
   authorClubTag?: string;
+  /** When true, the thread is force-tagged with defaultClubTag and the user can't change it. */
+  lockedClubTag?: boolean;
 }) {
   const router = useRouter();
   const { isAuthenticated } = useAuth();
@@ -64,6 +74,11 @@ export function Composer({
     }
   };
 
+  const lockedClub = lockedClubTag && defaultClubTag ? getClub(defaultClubTag) : undefined;
+  const lockedLabel = lockedClubTag
+    ? (lockedClub?.name ?? (defaultClubTag === "__general__" ? "General" : "this community"))
+    : null;
+
   if (!open) {
     return (
       <button
@@ -75,7 +90,11 @@ export function Composer({
           <Plus size={16} />
         </span>
         <span className="font-display text-lg font-bold tracking-[-0.01em] text-[var(--color-text-muted)] transition group-hover:text-[var(--color-text)]">
-          {isAuthenticated ? "Start a discussion." : "Log in to start a discussion."}
+          {!isAuthenticated
+            ? "Log in to start a discussion."
+            : lockedLabel
+              ? `Post in ${lockedLabel}.`
+              : "Start a discussion."}
         </span>
       </button>
     );
@@ -83,6 +102,12 @@ export function Composer({
 
   return (
     <form onSubmit={onSubmit} className="space-y-5 border-y border-[var(--color-line)] py-6">
+      {lockedLabel && (
+        <p className="font-mono-label text-[10px] text-[var(--color-text-faint)]">
+          Posting in{" "}
+          <span className="text-[var(--color-text)]">{lockedLabel}</span>
+        </p>
+      )}
       <div className="space-y-2">
         <label className="font-mono-label text-[10px] text-[var(--color-text-faint)]">
           Title

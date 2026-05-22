@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import type { Game } from "@/app/types";
 import { GameShell } from "@/components/games/GameShell";
 import { Button } from "@/components/ui/Button";
@@ -122,17 +123,25 @@ export function CrestGame({ game }: { game: Game }) {
               3+ next time gets you the points.
             </p>
           )}
-          <Button
-            onClick={() => {
-              setQuestions(buildCrestRound());
-              setPhase("intro");
-              setIdx(0);
-              setScore(0);
-              setPicked(null);
-            }}
-          >
-            Play again
-          </Button>
+          <div className="flex flex-col items-center gap-3">
+            <Button
+              onClick={() => {
+                setQuestions(buildCrestRound());
+                setPhase("intro");
+                setIdx(0);
+                setScore(0);
+                setPicked(null);
+              }}
+            >
+              Play again
+            </Button>
+            <Link
+              href="/games"
+              className="font-mono-label text-[10px] text-[var(--color-text-muted)] transition hover:text-[var(--color-text)]"
+            >
+              Back to games
+            </Link>
+          </div>
         </div>
       )}
     </GameShell>

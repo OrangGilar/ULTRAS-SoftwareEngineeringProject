@@ -75,6 +75,9 @@ public final class CommunityDtos {
             @NotBlank @Size(min = 1, max = 2000) String body
     ) {}
 
+    /** Blank/null clubTag means move to General (no club). */
+    public record MoveThreadRequest(String clubTag) {}
+
     /**
      * Internal mapping helper. Building responses requires knowing both the entity
      * AND whether the viewing user has upvoted, so this is a static factory rather
