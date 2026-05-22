@@ -1,4 +1,5 @@
 import type { Match } from "@/app/types";
+import { upcomingFixtures } from "./upcomingFixtures";
 
 export const matches: Match[] = [
   {
@@ -80,8 +81,15 @@ export const matches: Match[] = [
   },
 ];
 
+
+// Merge in the hardcoded upcoming slate from upcomingFixtures.ts so that
+// matchesById / getMatch / upcomingMatches see them — keeps the predict page
+// and every other consumer working without per-call branching. Remove this
+// merge and the import above when the backend gets real upcoming fixtures.
+const allMatches: Match[] = [...matches, ...upcomingFixtures];
+
 export const matchesById: Record<string, Match> = Object.fromEntries(
-  matches.map((m) => [m.id, m])
+  allMatches.map((m) => [m.id, m])
 );
 
 export function getMatch(id: string | undefined): Match | undefined {
@@ -90,13 +98,22 @@ export function getMatch(id: string | undefined): Match | undefined {
 }
 
 export function upcomingMatches(): Match[] {
-  return matches.filter((m) => m.status === "upcoming").sort((a, b) =>
-    a.kickoffISO.localeCompare(b.kickoffISO)
-  );
+  // Filter out matches whose kickoff is already in the past. Some of the
+  // long-lived hardcoded fixtures (m_001 etc.) have kickoff dates from
+  // earlier in the season but still carry status: "upcoming" because they
+  // were authored before that date arrived. Without this filter "upcoming"
+  // would surface stale fixtures to the feed and result-page "next up" hints.
+  //
+  // Compared as ISO strings — lexicographic compare on ISO-8601 with the
+  // same offset is equivalent to chronological compare, no Date parsing needed.
+  const nowIso = new Date().toISOString();
+  return allMatches
+    .filter((m) => m.status === "upcoming" && m.kickoffISO >= nowIso)
+    .sort((a, b) => a.kickoffISO.localeCompare(b.kickoffISO));
 }
 
 export function finishedMatches(): Match[] {
-  return matches.filter((m) => m.status === "finished").sort((a, b) =>
+  return allMatches.filter((m) => m.status === "finished").sort((a, b) =>
     b.kickoffISO.localeCompare(a.kickoffISO)
   );
 }

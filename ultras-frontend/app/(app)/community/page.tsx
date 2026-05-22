@@ -8,7 +8,7 @@ import { Composer } from "@/components/community/Composer";
 import { useLocalUser } from "@/hooks/useLocalUser";
 import { getClub } from "@/lib/mock/clubs";
 import { getThreads, type ApiThread, ApiError } from "@/lib/api";
-import { usePollingFetch } from "@/hooks/Usepollingfetch";
+import { usePollingFetch } from "@/hooks/usePollingFetch";
 
 type Filter = "club" | "all";
 

@@ -1,15 +1,27 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { recommendClubs, type QuizAnswer, type QuizMatch } from "@/lib/mock/quiz";
 import { ClubRecommendationCard } from "@/components/club/ClubRecommendationCard";
 import { Button } from "@/components/ui/Button";
 import { Skeleton } from "@/components/ui/Skeleton";
+import { MatchCard } from "@/components/match/MatchCard";
 import { useLocalUser } from "@/hooks/useLocalUser";
+import { findFixtureForClub } from "@/lib/mock/upcomingFixtures";
 
 const STORAGE_KEY = "ultras:quiz:answers:v1";
 
+/**
+ * Result page after the onboarding quiz.
+ *
+ * Adds a "your team's next match" section under the reveal: looks up the
+ * top-recommended club in the hardcoded upcoming fixture slate, and if
+ * present, shows it as a clickable MatchCard linking to the predict page.
+ * If the club isn't in the slate this section silently doesn't render —
+ * the rest of the page works the same.
+ */
 export default function QuizResultPage() {
   const router = useRouter();
   const { adoptClub } = useLocalUser();
@@ -41,6 +53,10 @@ export default function QuizResultPage() {
 
   const top = results[activeIdx];
   const others = results.filter((_, i) => i !== activeIdx);
+
+  // Look up the top club's next match in the hardcoded slate. Returns undefined
+  // if their team isn't playing in this round — we handle both cases below.
+  const nextMatch = findFixtureForClub(top.club.id);
 
   return (
     <div className="space-y-10">
@@ -76,6 +92,17 @@ export default function QuizResultPage() {
         <div className="border-t-2 border-[var(--color-success)] pt-4 text-sm text-[var(--color-success)]">
           Welcome to the {top.club.motto.toLowerCase()}. Heading to your feed.
         </div>
+      )}
+
+      {/* Featured match for the user's new club. The whole MatchCard is clickable
+          (routes to the predict page), so we don't need a separate CTA button. */}
+      {nextMatch && (
+        <section className="border-t border-[var(--color-line)] pt-8">
+          <p className="mb-4 font-mono-label text-[10px] text-[var(--color-text-muted)]">
+            {top.club.shortName}s next match — make your first prediction
+          </p>
+          <MatchCard match={nextMatch} />
+        </section>
       )}
 
       {others.length > 0 && (

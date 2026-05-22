@@ -18,7 +18,7 @@ import {
   ApiError,
 } from "@/lib/api";
 import { useAuth } from "@/hooks/useAuth";
-import { usePollingFetch } from "@/hooks/Usepollingfetch";
+import { usePollingFetch } from "@/hooks/usePollingFetch";
 
 /**
  * Thread detail page.
