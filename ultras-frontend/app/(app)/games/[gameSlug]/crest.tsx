@@ -7,22 +7,33 @@ import { Button } from "@/components/ui/Button";
 import { crestQuestions } from "@/lib/mock/games";
 import { clubsById } from "@/lib/mock/clubs";
 import { useLocalUser } from "@/hooks/useLocalUser";
-import { cn } from "@/lib/utils";
+import { cn, shuffle } from "@/lib/utils";
+
+type CrestQ = { clubId: string; choices: string[]; answerIndex: number };
+
+function buildCrestRound(): CrestQ[] {
+  return shuffle(crestQuestions).slice(0, 4).map((q) => {
+    const correct = q.choices[q.answerIndex];
+    const choices = shuffle([...q.choices]);
+    return { ...q, choices, answerIndex: choices.indexOf(correct) };
+  });
+}
 
 export function CrestGame({ game }: { game: Game }) {
   const { recordGameScore } = useLocalUser();
   const [phase, setPhase] = useState<"intro" | "playing" | "done">("intro");
+  const [questions, setQuestions] = useState<CrestQ[]>(() => buildCrestRound());
   const [idx, setIdx] = useState(0);
   const [score, setScore] = useState(0);
   const [picked, setPicked] = useState<number | null>(null);
 
-  const q = crestQuestions[idx];
+  const q = questions[idx];
   const club = clubsById[q.clubId];
 
   return (
     <GameShell
       title={game.name}
-      subtitle={`Round ${Math.min(idx + 1, crestQuestions.length)} of ${crestQuestions.length}`}
+      subtitle={`Round ${Math.min(idx + 1, questions.length)} of ${questions.length}`}
       score={score}
     >
       {phase === "intro" && (
@@ -30,7 +41,7 @@ export function CrestGame({ game }: { game: Game }) {
           <p className="prose-line text-base text-[var(--color-text-muted)]">
             We blur the crest. You name the club. {crestQuestions.length} rounds. 3+ wins {game.rewardPerWin} pts.
           </p>
-          <Button onClick={() => setPhase("playing")} size="lg">
+          <Button onClick={() => { setQuestions(buildCrestRound()); setPhase("playing"); }} size="lg">
             Start
           </Button>
         </div>
@@ -66,7 +77,7 @@ export function CrestGame({ game }: { game: Game }) {
                     const right = i === q.answerIndex;
                     if (right) setScore((s) => s + 1);
                     setTimeout(() => {
-                      if (idx >= crestQuestions.length - 1) {
+                      if (idx >= questions.length - 1) {
                         const finalScore = score + (right ? 1 : 0);
                         const reward = finalScore >= 3 ? game.rewardPerWin : 0;
                         recordGameScore(game.slug, finalScore, reward);
@@ -100,7 +111,7 @@ export function CrestGame({ game }: { game: Game }) {
           </p>
           <p className="font-display text-7xl font-bold tabular-nums leading-none tracking-[-0.04em] md:text-8xl">
             {score}
-            <span className="text-[var(--color-text-faint)]">/{crestQuestions.length}</span>
+            <span className="text-[var(--color-text-faint)]">/{questions.length}</span>
           </p>
           {score >= 3 ? (
             <p className="font-mono-label text-xs text-[var(--color-primary)]">
@@ -113,6 +124,7 @@ export function CrestGame({ game }: { game: Game }) {
           )}
           <Button
             onClick={() => {
+              setQuestions(buildCrestRound());
               setPhase("intro");
               setIdx(0);
               setScore(0);

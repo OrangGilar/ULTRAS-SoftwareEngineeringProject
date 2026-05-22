@@ -7,13 +7,17 @@ import { useLocalUser, useResetUser } from "@/hooks/useLocalUser";
 import { PageContainer, PageHeader } from "@/components/layout/PageContainer";
 import { Button } from "@/components/ui/Button";
 import { ChevronLeft } from "lucide-react";
+import { clubs, getClub } from "@/lib/mock/clubs";
 
 export default function SettingsPage() {
   const router = useRouter();
-  const { user, update } = useLocalUser();
+  const { user, update, adoptClub } = useLocalUser();
   const reset = useResetUser();
   const [name, setName] = useState(user.displayName);
   const [auto, setAuto] = useState(user.prefersAutoReveal);
+  const [pickedClubId, setPickedClubId] = useState<string>(user.clubId ?? "");
+  const [clubSaved, setClubSaved] = useState(false);
+  const currentClub = getClub(user.clubId);
 
   return (
     <PageContainer width="sm" className="space-y-10">
@@ -78,18 +82,66 @@ export default function SettingsPage() {
         </button>
       </section>
 
-      <section className="space-y-3 border-b border-[var(--color-line)] pb-6">
+      <section className="space-y-4 border-b border-[var(--color-line)] pb-6">
         <p className="font-display text-base font-bold tracking-[-0.01em]">
           Switch club
         </p>
         <p className="prose-line text-xs text-[var(--color-text-muted)]">
-          You can re-run the recommendation quiz. There's a 30-day cooldown after switching.
-          No swapping mid-season for trophies.
+          Re-run the recommendation quiz, or pick a club directly below. Switch as often as you like.
         </p>
         <div>
           <Link href="/onboarding/quiz">
             <Button variant="secondary">Re-run quiz</Button>
           </Link>
+        </div>
+
+        <div className="space-y-3 pt-2">
+          <label
+            htmlFor="club-picker"
+            className="block font-mono-label text-[10px] text-[var(--color-text-faint)]"
+          >
+            Pick manually
+            {currentClub && (
+              <span className="ml-2 normal-case text-[var(--color-text-muted)]">
+                / current: {currentClub.shortName}
+              </span>
+            )}
+          </label>
+          <select
+            id="club-picker"
+            value={pickedClubId}
+            onChange={(e) => {
+              setPickedClubId(e.target.value);
+              setClubSaved(false);
+            }}
+            className="w-full border-0 border-b border-[var(--color-line-strong)] bg-transparent px-0 py-2 font-display text-base font-bold tracking-[-0.01em] focus:border-[var(--color-primary)] focus:outline-none"
+          >
+            <option value="" disabled style={{ color: "#000", background: "#fff" }}>
+              Choose a club…
+            </option>
+            {clubs.map((c) => (
+              <option key={c.id} value={c.id} style={{ color: "#000", background: "#fff" }}>
+                {c.name}
+              </option>
+            ))}
+          </select>
+          <div className="flex items-center gap-3">
+            <Button
+              variant="primary"
+              disabled={!pickedClubId || pickedClubId === user.clubId}
+              onClick={() => {
+                adoptClub(pickedClubId);
+                setClubSaved(true);
+              }}
+            >
+              Save club
+            </Button>
+            {clubSaved && (
+              <span className="font-mono-label text-[10px] text-[var(--color-primary)]">
+                Saved.
+              </span>
+            )}
+          </div>
         </div>
       </section>
 
