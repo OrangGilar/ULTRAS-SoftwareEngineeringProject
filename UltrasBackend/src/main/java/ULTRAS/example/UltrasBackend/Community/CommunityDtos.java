@@ -11,13 +11,11 @@ import java.util.UUID;
 /**
  * Wire shapes shared by the controller, service, and frontend.
  *
- * The frontend's `Thread` type (in app/types/index.ts) has these fields:
- *   { id, clubId?, title, body, authorName, authorClubId?, upvotes, replyCount, createdAtISO }
- *
- * Our {@link ThreadResponse} mirrors that one-for-one (with `clubTag` mapping
- * to `clubId` and `createdAt` serialized as ISO-8601, which is what the
- * frontend expects). We add a `viewerHasUpvoted` field so the UI can show
- * the upvote button as already-pressed without an extra round-trip.
+ * authorId was added to both ThreadResponse and ReplyResponse so the
+ * frontend can compare it to the locally-cached `AuthResponse.userId` and
+ * show delete buttons only to the actual author. Without this, the only
+ * thing the client could compare on was authorName, which is fragile
+ * (display-name collisions, no guarantee of immutability).
  */
 public final class CommunityDtos {
 
@@ -31,6 +29,7 @@ public final class CommunityDtos {
             String clubId,           // a.k.a. clubTag — this is the topic club
             String title,
             String body,
+            UUID authorId,           // who created it — frontend compares to its own userId
             String authorName,
             String authorClubId,     // a.k.a. authorClubTag
             int upvotes,
@@ -43,6 +42,7 @@ public final class CommunityDtos {
     public record ReplyResponse(
             UUID id,
             UUID threadId,
+            UUID authorId,
             String authorName,
             String body,
             String createdAtISO
@@ -86,6 +86,7 @@ public final class CommunityDtos {
                 t.getClubTag(),
                 t.getTitle(),
                 t.getBody(),
+                t.getAuthorId(),
                 authorName,
                 t.getAuthorClubTag(),
                 t.getUpvoteCount(),
@@ -99,6 +100,7 @@ public final class CommunityDtos {
         return new ReplyResponse(
                 r.getId(),
                 r.getThreadId(),
+                r.getAuthorId(),
                 authorName,
                 r.getBody(),
                 r.getCreatedAt() != null ? r.getCreatedAt().toString() : null

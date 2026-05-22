@@ -5,6 +5,10 @@ import { api } from "./client";
  *
  * Note the casing: backend serializes to camelCase via Jackson defaults, so
  * `clubId`, `authorClubId`, `viewerHasUpvoted` are all natural to use here.
+ *
+ * `authorId` was added so the frontend can decide whether to show the delete
+ * button for a given thread or reply — compare it to the local userId from
+ * useAuth().auth.userId.
  */
 
 export type ApiThread = {
@@ -12,6 +16,7 @@ export type ApiThread = {
   clubId?: string;
   title: string;
   body: string;
+  authorId: string;
   authorName: string;
   authorClubId?: string;
   upvotes: number;
@@ -23,6 +28,7 @@ export type ApiThread = {
 export type ApiReply = {
   id: string;
   threadId: string;
+  authorId: string;
   authorName: string;
   body: string;
   createdAtISO: string;

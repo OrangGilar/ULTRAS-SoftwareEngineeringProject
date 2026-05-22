@@ -3,28 +3,37 @@
 import Link from "next/link";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowBigUp } from "lucide-react";
+import { ArrowBigUp, Trash2 } from "lucide-react";
 import type { ApiThread } from "@/lib/api";
-import { toggleUpvote, ApiError } from "@/lib/api";
+import { toggleUpvote, deleteThread, ApiError } from "@/lib/api";
 import { Avatar } from "@/components/ui/Avatar";
 import { getClub } from "@/lib/mock/clubs";
 import { useAuth } from "@/hooks/useAuth";
 import { cn, formatRelative } from "@/lib/utils";
 
 /**
- * The community page passes a refetch callback so the parent can re-pull threads
- * after an upvote — keeps the count canonical without us having to splice the
- * local copy. Also handles the "not logged in → bounce to /login" case.
+ * Thread row in the community list.
+ *
+ * The community page passes `onUpvoteChange` (re-fetch after upvote) and
+ * `onDeleted` (re-fetch after delete, OR splice the deleted thread out of
+ * the local list — see the list page for which it chose).
+ *
+ * Delete button only appears when the locally-cached userId matches the
+ * thread.authorId returned by the API. The backend also enforces
+ * author-only deletion (403 otherwise), so a savvy user can't bypass the
+ * UI — this check is just to avoid showing buttons that would always fail.
  */
 export function ThreadCard({
   thread,
   onUpvoteChange,
+  onDeleted,
 }: {
   thread: ApiThread;
   onUpvoteChange?: () => void;
+  onDeleted?: () => void;
 }) {
   const router = useRouter();
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, auth } = useAuth();
   const authorClub = getClub(thread.authorClubId);
   const threadClub = getClub(thread.clubId);
 
@@ -32,6 +41,9 @@ export function ThreadCard({
   const [optimisticVoted, setOptimisticVoted] = useState(thread.viewerHasUpvoted);
   const [optimisticCount, setOptimisticCount] = useState(thread.upvotes);
   const [busy, setBusy] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+
+  const isOwner = !!auth?.userId && auth.userId === thread.authorId;
 
   const onUpvoteClick = async (e: React.MouseEvent) => {
     e.preventDefault();   // we're inside a <Link>; stop the navigation
@@ -62,6 +74,25 @@ export function ThreadCard({
       console.error(msg);
     } finally {
       setBusy(false);
+    }
+  };
+
+  const onDeleteClick = async (e: React.MouseEvent) => {
+    e.preventDefault();      // we're inside a <Link>; stop the navigation
+    e.stopPropagation();
+    if (deleting) return;
+    if (!window.confirm("Delete this thread? This can't be undone.")) return;
+    setDeleting(true);
+    try {
+      await deleteThread(thread.id);
+      onDeleted?.();
+    } catch (err) {
+      const msg = err instanceof ApiError ? err.message : "Delete failed";
+      console.error(msg);
+      // Note: not surfacing this to the user inline because the list is the
+      // wrong place for a per-row error — the user can retry from the
+      // thread detail page where it'll show properly.
+      setDeleting(false);
     }
   };
 
@@ -108,9 +139,23 @@ export function ThreadCard({
         <p className="mt-1 line-clamp-2 text-sm text-[var(--color-text-muted)]">
           {thread.body}
         </p>
-        <p className="mt-3 font-mono-label text-[10px] text-[var(--color-text-faint)]">
-          {thread.replyCount} {thread.replyCount === 1 ? "reply" : "replies"}
-        </p>
+        <div className="mt-3 flex items-center gap-3 font-mono-label text-[10px] text-[var(--color-text-faint)]">
+          <span>
+            {thread.replyCount} {thread.replyCount === 1 ? "reply" : "replies"}
+          </span>
+          {isOwner && (
+            <button
+              type="button"
+              onClick={onDeleteClick}
+              disabled={deleting}
+              aria-label="Delete thread"
+              className="ml-auto inline-flex items-center gap-1 transition hover:text-[var(--color-primary)] disabled:opacity-40"
+            >
+              <Trash2 size={11} />
+              <span>{deleting ? "Deleting…" : "Delete"}</span>
+            </button>
+          )}
+        </div>
       </Link>
     </article>
   );
