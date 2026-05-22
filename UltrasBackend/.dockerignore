@@ -1,0 +1,33 @@
+# Anything not in this list is sent to the Docker daemon as build context.
+# Big context = slow builds. Keep it tight.
+
+# Build outputs
+build/
+.gradle/
+out/
+
+# IDE files
+.idea/
+.vscode/
+*.iml
+
+# Test output
+src/test/
+**/test-results/
+
+# Git + CI
+.git/
+.gitignore
+.github/
+
+# Docker bookkeeping
+Dockerfile
+.dockerignore
+
+# OS junk
+.DS_Store
+Thumbs.db
+
+# Local env files — never copied into the image; secrets come via env vars
+.env
+.env.local

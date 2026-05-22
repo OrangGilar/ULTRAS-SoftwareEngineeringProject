@@ -1,0 +1,60 @@
+# docker-compose.yml
+#
+# Local development stack. One command — `docker compose up` — brings up:
+#   - backend  (Spring Boot, port 8080)
+#   - frontend (Next.js,    port 3000)
+#
+# Both services point at the cloud Neon Postgres (option A from setup).
+# Secrets come from .env at the repo root — see .env.example for the
+# variable list. Never commit the real .env.
+#
+# Why no local Postgres container: keeps the stack thin and matches prod
+# (which uses Neon directly). Trade-off documented in the project README.
+
+services:
+  backend:
+    build:
+      context: ./UltrasBackend
+      dockerfile: Dockerfile
+    container_name: ultras-backend
+    ports:
+      - "8080:8080"
+    environment:
+      # Datasource — these override the defaults in application.properties.
+      SPRING_DATASOURCE_URL:      ${SPRING_DATASOURCE_URL}
+      SPRING_DATASOURCE_USERNAME: ${SPRING_DATASOURCE_USERNAME}
+      SPRING_DATASOURCE_PASSWORD: ${SPRING_DATASOURCE_PASSWORD}
+      # Auth
+      ULTRAS_JWT_SECRET:          ${ULTRAS_JWT_SECRET}
+      # CORS — must include the frontend's URL or all browser calls 403.
+      # Use the host-mapped port (localhost:3000), not the compose service name,
+      # because the browser running on the host is what makes the request.
+      ULTRAS_ALLOWED_ORIGINS:     http://localhost:3000
+      # API-Football
+      APIFOOTBALL_API_KEY:        ${APIFOOTBALL_API_KEY}
+      APIFOOTBALL_LIGA1_SEASON:   ${APIFOOTBALL_LIGA1_SEASON:-2024}
+    restart: unless-stopped
+    healthcheck:
+      # /api/matches is public and cheap. If the backend can't serve this it's
+      # broken — Spring Security or DB connection are the usual suspects.
+      test: ["CMD", "wget", "-qO-", "http://localhost:8080/api/matches"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s  # Spring Boot cold start can be slow on first run
+
+  frontend:
+    build:
+      context: ./ultras-frontend
+      dockerfile: Dockerfile
+      args:
+        # Baked into the client bundle at build time — must match where the
+        # backend is reachable from the *browser*, not from inside Docker.
+        NEXT_PUBLIC_API_URL: http://localhost:8080
+    container_name: ultras-frontend
+    ports:
+      - "3000:3000"
+    depends_on:
+      backend:
+        condition: service_started
+    restart: unless-stopped
