@@ -6,17 +6,17 @@ const RITUALS = [
   {
     no: "01",
     title: "Predict",
-    body: "Lock scorelines. Name first scorers. Ride the multiplier on takes you actually believe.",
+    body: "Guess the winner!",
   },
   {
     no: "02",
     title: "Debate",
-    body: "Threads with the rest of the terrace. Sharp opinions, civil voices, no warm bath.",
+    body: "Discuss football-related topic",
   },
   {
     no: "03",
     title: "Earn",
-    body: "Points compound into limited scarves, stadium tours, and pitch-side passes.",
+    body: "Earn your points!",
   },
 ];
 
@@ -29,9 +29,9 @@ export default function LandingPage() {
         </div>
 
         <h1 className="font-display mt-10 text-[clamp(64px,13vw,200px)] font-bold leading-[0.92] tracking-[-0.04em]">
-          For the
+          For The
           <br />
-          <span className="text-[var(--color-primary)]">terraces</span>.
+          <span className="text-[var(--color-primary)]">FANS</span>.
         </h1>
 
         <p className="prose-line mt-12 text-[clamp(18px,2.2vw,28px)] leading-snug text-[var(--color-text-muted)]">
@@ -92,14 +92,10 @@ export default function LandingPage() {
         </div>
 
         <ol className="mt-10 divide-y divide-[var(--color-line)]">
-          {RITUALS.map((r, i) => (
+          {RITUALS.map((r) => (
             <li
               key={r.no}
-              className={
-                i % 2 === 0
-                  ? "grid grid-cols-1 gap-6 py-10 md:grid-cols-12 md:py-16"
-                  : "grid grid-cols-1 gap-6 py-10 md:grid-cols-12 md:py-16 md:[&>*:first-child]:col-start-2"
-              }
+              className="grid grid-cols-1 gap-6 py-10 md:grid-cols-12 md:py-16"
             >
               {/* Number — Bebas Neue, big, scarlet */}
               <div
@@ -119,20 +115,6 @@ export default function LandingPage() {
         </ol>
       </section>
 
-      <section className="bg-[var(--color-primary)] text-[var(--color-pure-white)]">
-        <div className="mx-auto flex w-full max-w-screen-xl flex-col gap-8 px-6 py-20 md:flex-row md:items-end md:justify-between md:py-28">
-          <h2 className="font-display text-5xl font-bold leading-[0.95] tracking-tight md:text-7xl">
-            Pick a side.
-            <br />
-            Stay loud.
-          </h2>
-          <Link href="/onboarding/quiz">
-            <Button size="lg" variant="accent">
-              Find my club
-            </Button>
-          </Link>
-        </div>
-      </section>
     </div>
   );
 }

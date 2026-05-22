@@ -6,18 +6,28 @@ import { GameShell } from "@/components/games/GameShell";
 import { Button } from "@/components/ui/Button";
 import { triviaQuestions } from "@/lib/mock/games";
 import { useLocalUser } from "@/hooks/useLocalUser";
-import { cn } from "@/lib/utils";
+import { cn, shuffle } from "@/lib/utils";
 
+type TriviaQ = { prompt: string; choices: string[]; answerIndex: number };
 type Phase = "intro" | "playing" | "done";
+
+function buildRound(): TriviaQ[] {
+  return shuffle(triviaQuestions).slice(0, 5).map((q) => {
+    const correct = q.choices[q.answerIndex];
+    const choices = shuffle([...q.choices]);
+    return { ...q, choices, answerIndex: choices.indexOf(correct) };
+  });
+}
 
 export function TriviaGame({ game }: { game: Game }) {
   const { recordGameScore } = useLocalUser();
   const [phase, setPhase] = useState<Phase>("intro");
+  const [questions, setQuestions] = useState<TriviaQ[]>(() => buildRound());
   const [idx, setIdx] = useState(0);
   const [score, setScore] = useState(0);
   const [picked, setPicked] = useState<number | null>(null);
 
-  const q = triviaQuestions[idx];
+  const q = questions[idx];
 
   const onPick = (i: number) => {
     if (picked !== null) return;
@@ -48,7 +58,7 @@ export function TriviaGame({ game }: { game: Game }) {
           <p className="prose-line text-base text-[var(--color-text-muted)]">
             Answer 5 quick questions on Liga 1. 3+ correct unlocks {game.rewardPerWin} pts.
           </p>
-          <Button onClick={() => setPhase("playing")} size="lg">
+          <Button onClick={() => { setQuestions(buildRound()); setPhase("playing"); }} size="lg">
             Start
           </Button>
         </div>
@@ -104,6 +114,7 @@ export function TriviaGame({ game }: { game: Game }) {
           )}
           <Button
             onClick={() => {
+              setQuestions(buildRound());
               setPhase("intro");
               setIdx(0);
               setScore(0);
