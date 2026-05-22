@@ -13,6 +13,7 @@ import java.util.UUID;
 public interface ThreadRepository extends JpaRepository<Thread, UUID> {
     List<Thread> findAllByOrderByCreatedAtDesc(Pageable pageable);
     List<Thread> findByClubTagOrderByCreatedAtDesc(String clubTag, Pageable pageable);
+    List<Thread> findByClubTagIsNullOrderByCreatedAtDesc(Pageable pageable);
 
     @Modifying
     @Query("UPDATE Thread t SET t.upvoteCount = t.upvoteCount + 1 WHERE t.id = :id")

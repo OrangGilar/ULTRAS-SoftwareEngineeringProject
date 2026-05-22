@@ -34,9 +34,14 @@ public class CommunityService {
     @Transactional(readOnly = true)
     public List<ThreadResponse> list(String clubTag, int limit, UUID viewerId) {
         Pageable page = PageRequest.of(0, Math.min(Math.max(limit, 1), 100));
-        List<Thread> threads = (clubTag == null || clubTag.isBlank())
-                ? threadRepo.findAllByOrderByCreatedAtDesc(page)
-                : threadRepo.findByClubTagOrderByCreatedAtDesc(clubTag, page);
+        final List<Thread> threads;
+        if (clubTag == null || clubTag.isBlank()) {
+            threads = threadRepo.findAllByOrderByCreatedAtDesc(page);
+        } else if (KnownClubs.GENERAL_TAG.equals(clubTag)) {
+            threads = threadRepo.findByClubTagIsNullOrderByCreatedAtDesc(page);
+        } else {
+            threads = threadRepo.findByClubTagOrderByCreatedAtDesc(clubTag, page);
+        }
 
         if (threads.isEmpty()) return List.of();
 
@@ -91,12 +96,24 @@ public class CommunityService {
         User author = userRepo.findById(authorId)
                 .orElseThrow(() -> new ApiException(HttpStatus.UNAUTHORIZED, "Unknown user"));
 
+        // Clamp clubTag to the canonical Liga 1 list. Anything else (including the
+        // GENERAL_TAG sentinel, which is a query-only value) gets dropped to null
+        // so users can't invent fake communities by hand-crafting the payload.
+        String clubTag = blankToNull(req.clubTag());
+        if (clubTag != null && !KnownClubs.isValid(clubTag)) {
+            clubTag = null;
+        }
+        String authorClubTag = blankToNull(req.authorClubTag());
+        if (authorClubTag != null && !KnownClubs.isValid(authorClubTag)) {
+            authorClubTag = null;
+        }
+
         Thread thread = Thread.builder()
                 .title(req.title().trim())
                 .body(req.body().trim())
-                .clubTag(blankToNull(req.clubTag()))
+                .clubTag(clubTag)
                 .authorId(authorId)
-                .authorClubTag(blankToNull(req.authorClubTag()))
+                .authorClubTag(authorClubTag)
                 .upvoteCount(0)
                 .replyCount(0)
                 .createdAt(OffsetDateTime.now())
@@ -104,6 +121,25 @@ public class CommunityService {
 
         thread = threadRepo.save(thread);
         return toResponse(thread, author.getUsername(), false);
+    }
+
+    @Transactional
+    public ThreadResponse move(UUID threadId, UUID viewerId, MoveThreadRequest req) {
+        Thread thread = threadRepo.findById(threadId)
+                .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Thread not found"));
+        if (!thread.getAuthorId().equals(viewerId)) {
+            throw new ApiException(HttpStatus.FORBIDDEN, "Only the author can move this thread");
+        }
+        String clubTag = blankToNull(req.clubTag());
+        if (clubTag != null && !KnownClubs.isValid(clubTag)) {
+            clubTag = null;
+        }
+        thread.setClubTag(clubTag);
+        threadRepo.save(thread);
+        User author = userRepo.findById(viewerId)
+                .orElseThrow(() -> new ApiException(HttpStatus.UNAUTHORIZED, "Unknown user"));
+        boolean viewerHasUpvoted = upvoteRepo.findByThreadIdAndUserId(threadId, viewerId).isPresent();
+        return toResponse(thread, author.getUsername(), viewerHasUpvoted);
     }
 
     @Transactional

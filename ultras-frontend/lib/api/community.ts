@@ -89,6 +89,11 @@ export async function toggleUpvote(threadId: string): Promise<ApiUpvoteResponse>
   return data;
 }
 
+export async function moveThread(id: string, clubTag: string | null): Promise<ApiThread> {
+  const { data } = await api.patch<ApiThread>(`/api/threads/${encodeURIComponent(id)}/move`, { clubTag: clubTag ?? "" });
+  return data;
+}
+
 export async function createReply(threadId: string, payload: CreateReplyPayload): Promise<ApiReply> {
   const { data } = await api.post<ApiReply>(`/api/threads/${encodeURIComponent(threadId)}/replies`, payload);
   return data;
