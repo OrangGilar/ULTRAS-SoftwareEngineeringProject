@@ -269,3 +269,11 @@ export function getClub(id: string | undefined): Club | undefined {
   if (!id) return undefined;
   return clubsById[id];
 }
+
+/**
+ * Sentinel for the "General" community — threads with no clubTag.
+ * Matches the backend's KnownClubs.GENERAL_TAG. The backend recognises this
+ * value on read (translates it to WHERE club_tag IS NULL) but rejects it on
+ * write (falls back to null), so it never gets persisted.
+ */
+export const GENERAL_COMMUNITY_TAG = "__general__";

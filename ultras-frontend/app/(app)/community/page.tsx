@@ -1,46 +1,39 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { PageContainer, PageHeader } from "@/components/layout/PageContainer";
-import { Tabs } from "@/components/ui/Tabs";
+import Link from "next/link";
+import Image from "next/image";
+import { PageContainer, PageHeader, SectionHeading } from "@/components/layout/PageContainer";
 import { ThreadCard } from "@/components/community/ThreadCard";
-import { Composer } from "@/components/community/Composer";
-import { useLocalUser } from "@/hooks/useLocalUser";
-import { getClub } from "@/lib/mock/clubs";
+import { clubs } from "@/lib/mock/clubs";
 import { getThreads, type ApiThread, ApiError } from "@/lib/api";
 import { usePollingFetch } from "@/hooks/usePollingFetch";
+<<<<<<< HEAD
 
 type Filter = "club" | "all";
+=======
+>>>>>>> 3cedad9051b9ff06915df5d11f90cb14488ff9d3
 
+/**
+ * Community landing. Two stacked sections:
+ *   1. A grid of every Liga 1 club community + a "General" bucket for off-topic.
+ *   2. A read-only "Recent across Liga 1" feed of the latest threads from any club.
+ *
+ * Posting happens inside a specific community (/community/c/[clubId]) so threads
+ * always have a home — this page intentionally has no composer.
+ */
 export default function CommunityPage() {
-  const { user } = useLocalUser();
-  const club = getClub(user.clubId);
-  const [filter, setFilter] = useState<Filter>(club ? "club" : "all");
-  const [threads, setThreads] = useState<ApiThread[]>([]);
+  const [recent, setRecent] = useState<ApiThread[]>([]);
   const [loading, setLoading] = useState(true);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
-  /**
-   * Memoized so we can call it from useEffect, Composer's onPosted, ThreadCard's
-   * onUpvoteChange and onDeleted callbacks, and from the background poll.
-   *
-   * `silent` skips the loading spinner — used by the polling tick so the
-   * list doesn't flash empty every 10 seconds.
-   */
   const refetch = useCallback(async (silent: boolean = false) => {
     if (!silent) setLoading(true);
     if (!silent) setErrorMsg(null);
     try {
-      const data = await getThreads({
-        clubTag: filter === "club" && club ? club.id : undefined,
-        limit: 30,
-      });
-      setThreads(data);
-      if (silent) setErrorMsg(null);
+      const data = await getThreads({ limit: 10 });
+      setRecent(data);
     } catch (err) {
-      // Stay quiet on poll failures so a single flaky request doesn't blow
-      // away the loaded list — next tick will recover or the user will
-      // see the error on the next manual action.
       if (silent) {
         console.warn("Background community poll failed; will retry", err);
         return;
@@ -51,11 +44,11 @@ export default function CommunityPage() {
           ? "Couldn't reach the server. Is the backend running?"
           : `Failed to load threads: ${apiErr.message}`,
       );
-      setThreads([]);
+      setRecent([]);
     } finally {
       if (!silent) setLoading(false);
     }
-  }, [filter, club]);
+  }, []);
 
   // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => { refetch(false); }, [refetch]);
@@ -65,50 +58,94 @@ export default function CommunityPage() {
   usePollingFetch(() => refetch(true), 15000, true);
 
   return (
-    <PageContainer width="md" className="space-y-10">
+    <PageContainer width="lg" className="space-y-12">
       <PageHeader
         eyebrow="The terraces"
         title={<>Community.</>}
-        lede="Loud takes welcome. Personal attacks aren't."
+        lede="Pick a club, join the chant. Each side has its own corner — keep your takes on-topic and your name on the team sheet."
       />
 
-      <Tabs<Filter>
-        value={filter}
-        onChange={setFilter}
-        options={[
-          { id: "club", label: club ? `My club / ${club.shortName}` : "My club" },
-          { id: "all", label: "All Liga 1" },
-        ]}
-      />
-
-      <Composer onPosted={() => refetch(false)} defaultClubTag={club?.id} authorClubTag={user.clubId} />
-
-      {errorMsg && (
-        <div role="alert" className="border border-[var(--color-primary)] py-10 px-5 font-mono-label text-xs text-[var(--color-primary)]">
-          {errorMsg}
-        </div>
-      )}
-
-      {loading ? (
-        <div className="border border-dashed border-[var(--color-line)] py-16 text-center font-mono-label text-xs text-[var(--color-text-muted)]">
-          Loading threads…
-        </div>
-      ) : threads.length === 0 ? (
-        <div className="border border-dashed border-[var(--color-line)] py-16 text-center font-mono-label text-xs text-[var(--color-text-muted)]">
-          No threads here yet. Be the first to say something.
-        </div>
-      ) : (
-        <div>
-          {threads.map((t) => (
-            <ThreadCard
-              key={t.id}
-              thread={t}
-              onUpvoteChange={() => refetch(true)}
-              onDeleted={() => refetch(false)}
-            />
+      <section>
+        <SectionHeading title="Communities" hint={`${clubs.length} Liga 1 clubs + General`} />
+        <ul className="grid grid-cols-2 gap-px bg-[var(--color-line)] sm:grid-cols-3 md:grid-cols-4">
+          <li className="bg-[var(--color-bg)]">
+            <Link
+              href="/community/c/general"
+              className="flex h-full flex-col items-center justify-center gap-2 p-5 text-center transition hover:bg-[var(--color-surface)]"
+            >
+              <span
+                className="grid h-12 w-12 place-items-center rounded-full font-display text-lg font-bold text-[var(--color-pure-white)]"
+                style={{ backgroundColor: "var(--color-text-faint)" }}
+              >
+                #
+              </span>
+              <span className="font-display text-sm font-bold leading-tight tracking-[-0.01em]">
+                General
+              </span>
+              <span className="font-mono-label text-[9px] text-[var(--color-text-faint)]">
+                Off-topic / Liga 1
+              </span>
+            </Link>
+          </li>
+          {clubs.map((c) => (
+            <li key={c.id} className="bg-[var(--color-bg)]">
+              <Link
+                href={`/community/c/${c.id}`}
+                className="flex h-full flex-col items-center justify-center gap-2 p-5 text-center transition hover:bg-[var(--color-surface)]"
+              >
+                {c.logo ? (
+                  <Image
+                    src={c.logo}
+                    alt={`${c.name} crest`}
+                    width={48}
+                    height={48}
+                    className="h-12 w-12 object-contain"
+                  />
+                ) : (
+                  <span
+                    className="grid h-12 w-12 place-items-center rounded-full font-display text-lg font-bold text-[var(--color-pure-white)]"
+                    style={{ backgroundColor: c.colors[0] }}
+                  >
+                    {c.shortName.slice(0, 2)}
+                  </span>
+                )}
+                <span className="font-display text-sm font-bold leading-tight tracking-[-0.01em]">
+                  {c.shortName}
+                </span>
+                <span className="font-mono-label text-[9px] text-[var(--color-text-faint)] line-clamp-1">
+                  {c.name}
+                </span>
+              </Link>
+            </li>
           ))}
-        </div>
-      )}
+        </ul>
+      </section>
+
+      <section>
+        <SectionHeading title="Recent across Liga 1" hint="Newest threads from every community" />
+
+        {errorMsg && (
+          <div role="alert" className="border border-[var(--color-primary)] py-10 px-5 font-mono-label text-xs text-[var(--color-primary)]">
+            {errorMsg}
+          </div>
+        )}
+
+        {loading ? (
+          <div className="border border-dashed border-[var(--color-line)] py-16 text-center font-mono-label text-xs text-[var(--color-text-muted)]">
+            Loading threads…
+          </div>
+        ) : recent.length === 0 ? (
+          <div className="border border-dashed border-[var(--color-line)] py-16 text-center font-mono-label text-xs text-[var(--color-text-muted)]">
+            No threads anywhere yet. Pick a community and break the silence.
+          </div>
+        ) : (
+          <div>
+            {recent.map((t) => (
+              <ThreadCard key={t.id} thread={t} onUpvoteChange={refetch} />
+            ))}
+          </div>
+        )}
+      </section>
     </PageContainer>
   );
 }

@@ -176,7 +176,7 @@ export default function RegisterPage() {
             )}
           </span>
           <span className="prose-line text-xs leading-snug text-[var(--color-text-muted)]">
-            I&apos;ll keep it civil. No personal attacks, no slurs, no flares indoors.
+            I agree to the terms and conditions.
           </span>
         </label>
 

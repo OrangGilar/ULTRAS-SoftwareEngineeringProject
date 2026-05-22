@@ -1,17 +1,22 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { upcomingMatches, finishedMatches } from "@/lib/mock/matches";
 import { findFixtureForClub } from "@/lib/mock/upcomingFixtures";
 import { threads } from "@/lib/mock/threads";
 import { games } from "@/lib/mock/games";
-import { getClub } from "@/lib/mock/clubs";
+import { getClub, clubs } from "@/lib/mock/clubs";
 import { PageContainer, PageHeader, SectionHeading } from "@/components/layout/PageContainer";
 import { MatchCard } from "@/components/match/MatchCard";
-import { ThreadCard } from "@/components/community/ThreadCard";
 import { GameTile } from "@/components/games/GameTile";
 import { PointsBalance } from "@/components/rewards/PointsBalance";
 import { useLocalUser } from "@/hooks/useLocalUser";
+<<<<<<< HEAD
+=======
+
+const FEATURED_CLUB_IDS = ["persib", "persija", "psm"];
+>>>>>>> 3cedad9051b9ff06915df5d11f90cb14488ff9d3
 
 export default function FeedPage() {
   const { user } = useLocalUser();
@@ -34,6 +39,17 @@ export default function FeedPage() {
   const homeClub = recentResult ? getClub(recentResult.homeId) : null;
   const awayClub = recentResult ? getClub(recentResult.awayId) : null;
 
+<<<<<<< HEAD
+=======
+  // User's club first, then fill from featured list, deduped, max 3.
+  const featuredIds = [
+    ...(user.clubId ? [user.clubId] : []),
+    ...FEATURED_CLUB_IDS.filter((id) => id !== user.clubId),
+  ].slice(0, 3);
+  const featuredClubs = featuredIds.map((id) => getClub(id)).filter(Boolean) as NonNullable<ReturnType<typeof getClub>>[];
+  const totalCommunities = clubs.length + 1; // +1 for General
+
+>>>>>>> 3cedad9051b9ff06915df5d11f90cb14488ff9d3
   return (
     <PageContainer width="md" className="space-y-12">
       <PageHeader
@@ -87,7 +103,8 @@ export default function FeedPage() {
 
       <section>
         <SectionHeading
-          title="Trending discussions"
+          title="Communities"
+          hint={`${totalCommunities} total`}
           action={
             <Link
               href="/community"
@@ -97,11 +114,44 @@ export default function FeedPage() {
             </Link>
           }
         />
+<<<<<<< HEAD
         <div>
           {trendingThreads.map((t) => (
             <ThreadCard key={t.id} thread={t} />
           ))}
         </div>
+=======
+        <ul className="grid grid-cols-3 gap-px bg-[var(--color-line)]">
+          {featuredClubs.map((c) => (
+            <li key={c.id} className="bg-[var(--color-bg)]">
+              <Link
+                href={`/community/c/${c.id}`}
+                className="flex h-full flex-col items-center justify-center gap-2 p-5 text-center transition hover:bg-[var(--color-surface)]"
+              >
+                {c.logo ? (
+                  <Image
+                    src={c.logo}
+                    alt={`${c.name} crest`}
+                    width={40}
+                    height={40}
+                    className="h-10 w-10 object-contain"
+                  />
+                ) : (
+                  <span
+                    className="grid h-10 w-10 place-items-center rounded-full font-display text-sm font-bold text-[var(--color-pure-white)]"
+                    style={{ backgroundColor: c.colors[0] }}
+                  >
+                    {c.shortName.slice(0, 2)}
+                  </span>
+                )}
+                <span className="font-display text-sm font-bold leading-tight tracking-[-0.01em]">
+                  {c.shortName}
+                </span>
+              </Link>
+            </li>
+          ))}
+        </ul>
+>>>>>>> 3cedad9051b9ff06915df5d11f90cb14488ff9d3
       </section>
 
       <section>

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import Link from "next/link";
 import type { Game } from "@/app/types";
 import { GameShell } from "@/components/games/GameShell";
 import { Button } from "@/components/ui/Button";
@@ -146,14 +147,22 @@ export function MemoryGame({ game }: { game: Game }) {
           <p className="font-display text-7xl font-bold tabular-nums leading-none tracking-[-0.04em] md:text-8xl">
             {moves} <span className="text-2xl text-[var(--color-text-faint)]">moves</span>
           </p>
-          <Button
-            onClick={() => {
-              reset();
-              setPhase("playing");
-            }}
-          >
-            Play again
-          </Button>
+          <div className="flex flex-col items-center gap-3">
+            <Button
+              onClick={() => {
+                reset();
+                setPhase("playing");
+              }}
+            >
+              Play again
+            </Button>
+            <Link
+              href="/games"
+              className="font-mono-label text-[10px] text-[var(--color-text-muted)] transition hover:text-[var(--color-text)]"
+            >
+              Back to games
+            </Link>
+          </div>
         </div>
       )}
     </GameShell>
