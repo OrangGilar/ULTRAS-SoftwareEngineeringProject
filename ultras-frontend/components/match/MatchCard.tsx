@@ -1,27 +1,41 @@
 import Link from "next/link";
 import type { Match } from "@/app/types";
+import type { ApiMatch } from "@/lib/api";
 import { getClub } from "@/lib/mock/clubs";
 import { ClubBadge } from "@/components/club/ClubBadge";
 import { formatKickoff } from "@/lib/utils";
 import { cn } from "@/lib/utils";
 
 export type MatchCardProps = {
-  match: Match;
+  // Accept either the bare Match type (for mock data) or the API-extended ApiMatch
+  // (which includes homeName/awayName/logo fallbacks for unmapped clubs).
+  match: Match | ApiMatch;
   userPrediction?: { home: number; away: number };
   variant?: "default" | "compact";
 };
 
+// Fixed: original code keyed on "scheduled" which doesn't exist in the Match
+// status union — it's "upcoming". The UI silently fell through to undefined.
 const STATUS_LABEL: Record<Match["status"], string> = {
   live: "Live now",
   finished: "Full time",
   postponed: "Postponed",
-  scheduled: "Upcoming",
+  upcoming: "Upcoming",
 };
 
 export function MatchCard({ match, userPrediction, variant = "default" }: MatchCardProps) {
+  const apiMatch = match as ApiMatch;
+
+  // Try the local clubs.ts first (rich Indonesian club metadata, crests, motto, etc.).
+  // If the slug isn't there (new team API-Football returned that we haven't mapped
+  // yet), fall back to the homeName/homeLogo the API gave us.
   const home = getClub(match.homeId);
   const away = getClub(match.awayId);
-  if (!home || !away) return null;
+
+  const homeDisplay = home ?? fallbackClub(apiMatch.homeName, apiMatch.homeLogo, match.homeId);
+  const awayDisplay = away ?? fallbackClub(apiMatch.awayName, apiMatch.awayLogo, match.awayId);
+
+  if (!homeDisplay || !awayDisplay) return null;
 
   const href =
     match.status === "finished"
@@ -55,10 +69,10 @@ export function MatchCard({ match, userPrediction, variant = "default" }: MatchC
 
       <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-4">
         <div className="flex items-center gap-3">
-          <ClubBadge club={home} size={variant === "compact" ? "sm" : "md"} />
+          <ClubBadge club={homeDisplay} size={variant === "compact" ? "sm" : "md"} />
           <div className="min-w-0">
-            <p className="truncate text-sm font-bold tracking-tight">{home.shortName}</p>
-            <p className="truncate text-[10px] text-[var(--color-text-faint)]">{home.city}</p>
+            <p className="truncate text-sm font-bold tracking-tight">{homeDisplay.shortName}</p>
+            <p className="truncate text-[10px] text-[var(--color-text-faint)]">{homeDisplay.city}</p>
           </div>
         </div>
 
@@ -76,10 +90,10 @@ export function MatchCard({ match, userPrediction, variant = "default" }: MatchC
 
         <div className="flex items-center justify-end gap-3">
           <div className="min-w-0 text-right">
-            <p className="truncate text-sm font-bold tracking-tight">{away.shortName}</p>
-            <p className="truncate text-[10px] text-[var(--color-text-faint)]">{away.city}</p>
+            <p className="truncate text-sm font-bold tracking-tight">{awayDisplay.shortName}</p>
+            <p className="truncate text-[10px] text-[var(--color-text-faint)]">{awayDisplay.city}</p>
           </div>
-          <ClubBadge club={away} size={variant === "compact" ? "sm" : "md"} />
+          <ClubBadge club={awayDisplay} size={variant === "compact" ? "sm" : "md"} />
         </div>
       </div>
 
@@ -97,4 +111,26 @@ export function MatchCard({ match, userPrediction, variant = "default" }: MatchC
       </p>
     </Link>
   );
+}
+
+/**
+ * Build a minimal Club-shaped object from API-Football data when we don't
+ * have a local clubs.ts entry. Lets brand-new fixtures still render instead
+ * of returning null and leaving the user with a confusing empty grid.
+ */
+function fallbackClub(name?: string, logo?: string, id?: string) {
+  if (!name) return null;
+  return {
+    id: id ?? name,
+    name,
+    shortName: name.length > 12 ? name.slice(0, 3).toUpperCase() : name,
+    city: "—",
+    region: "Other" as const,
+    founded: 0,
+    colors: ["#888888", "#cccccc"] as [string, string],
+    crestEmoji: "",
+    logo,
+    vibe: [] as never[],
+    motto: "",
+  };
 }

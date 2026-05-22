@@ -1,26 +1,95 @@
+"use client";
+
 import Link from "next/link";
-import { notFound } from "next/navigation";
-import { getThread } from "@/lib/mock/threads";
+import { useEffect, useState, use } from "react";
+import { notFound, useRouter } from "next/navigation";
 import { getClub } from "@/lib/mock/clubs";
 import { PageContainer } from "@/components/layout/PageContainer";
 import { Avatar } from "@/components/ui/Avatar";
+import { Button } from "@/components/ui/Button";
 import { ChevronLeft } from "lucide-react";
 import { formatRelative } from "@/lib/utils";
+import { getThread, createReply, type ApiThreadDetail, ApiError } from "@/lib/api";
+import { useAuth } from "@/hooks/useAuth";
 
-const MOCK_REPLIES = [
-  { id: "r1", author: "PangeranTimur", body: "Three at the back is fine for one game, not a system.", upvotes: 28 },
-  { id: "r2", author: "TerrasUtara", body: "Disagree. Wing-backs are key to our press right now.", upvotes: 14 },
-  { id: "r3", author: "JakOnline", body: "We're better with a midfield three. Settle this once and for all.", upvotes: 7 },
-];
-
-export default async function ThreadPage({
+export default function ThreadPage({
   params,
 }: {
   params: Promise<{ threadId: string }>;
 }) {
-  const { threadId } = await params;
-  const thread = getThread(threadId);
-  if (!thread) notFound();
+  // Next.js 16 params are a Promise — `use()` unwraps in a client component.
+  const { threadId } = use(params);
+  const router = useRouter();
+  const { isAuthenticated } = useAuth();
+
+  const [data, setData] = useState<ApiThreadDetail | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [notFoundFlag, setNotFoundFlag] = useState(false);
+
+  // Reply composer state
+  const [replyBody, setReplyBody] = useState("");
+  const [posting, setPosting] = useState(false);
+  const [postError, setPostError] = useState<string | null>(null);
+
+  const refetch = async () => {
+    setLoading(true);
+    setErrorMsg(null);
+    try {
+      const detail = await getThread(threadId);
+      setData(detail);
+    } catch (err) {
+      if (err instanceof ApiError && err.status === 404) {
+        setNotFoundFlag(true);
+        return;
+      }
+      const apiErr = err instanceof ApiError ? err : new ApiError(String(err), 0);
+      setErrorMsg(apiErr.status === 0 ? "Couldn't reach the server." : apiErr.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // eslint-disable-next-line react-hooks/set-state-in-effect
+  useEffect(() => { refetch(); /* eslint-disable-next-line react-hooks/exhaustive-deps */ }, [threadId]);
+
+  if (notFoundFlag) notFound();
+
+  const onSubmitReply = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!replyBody.trim() || posting) return;
+    if (!isAuthenticated) {
+      router.push("/login");
+      return;
+    }
+    setPosting(true);
+    setPostError(null);
+    try {
+      await createReply(threadId, { body: replyBody.trim() });
+      setReplyBody("");
+      await refetch();
+    } catch (err) {
+      const apiErr = err instanceof ApiError ? err : new ApiError(String(err), 0);
+      setPostError(apiErr.status === 0 ? "Couldn't reach the server." : apiErr.message);
+    } finally {
+      setPosting(false);
+    }
+  };
+
+  if (loading || !data) {
+    return (
+      <PageContainer width="md" className="space-y-10">
+        <Link href="/community" className="inline-flex items-center gap-1 font-mono-label text-[10px] text-[var(--color-text-muted)] transition hover:text-[var(--color-primary)]">
+          <ChevronLeft size={14} /> Back to community
+        </Link>
+        <div className="border border-dashed border-[var(--color-line)] py-16 text-center font-mono-label text-xs text-[var(--color-text-muted)]">
+          {errorMsg ?? "Loading…"}
+        </div>
+      </PageContainer>
+    );
+  }
+
+  const { thread, replies } = data;
   const authorClub = getClub(thread.authorClubId);
   const threadClub = getClub(thread.clubId);
 
@@ -54,29 +123,64 @@ export default async function ThreadPage({
         <h1 className="font-display text-4xl font-bold leading-[1.05] tracking-[-0.02em] md:text-5xl">
           {thread.title}
         </h1>
-        <p className="prose-line text-base leading-snug text-[var(--color-text-muted)] md:text-lg">
+        <p className="prose-line text-base leading-snug text-[var(--color-text-muted)] md:text-lg whitespace-pre-wrap">
           {thread.body}
         </p>
       </article>
 
       <section>
         <h2 className="mb-2 border-b border-[var(--color-line)] pb-2 font-mono-label text-[10px] text-[var(--color-text-muted)]">
-          {thread.replyCount} replies
+          {replies.length} {replies.length === 1 ? "reply" : "replies"}
         </h2>
-        <ul className="divide-y divide-[var(--color-line)]">
-          {MOCK_REPLIES.map((r) => (
-            <li key={r.id} className="py-5">
-              <div className="mb-2 flex items-center gap-2 font-mono-label text-[10px] text-[var(--color-text-muted)]">
-                <Avatar name={r.author} size="xs" />
-                <span className="text-[var(--color-text)]">{r.author}</span>
-              </div>
-              <p className="prose-line text-sm leading-snug">{r.body}</p>
-              <p className="mt-3 font-mono-label text-[10px] text-[var(--color-text-faint)]">
-                {r.upvotes} upvotes
-              </p>
-            </li>
-          ))}
-        </ul>
+
+        {replies.length === 0 ? (
+          <div className="py-8 text-center font-mono-label text-[10px] text-[var(--color-text-faint)]">
+            No replies yet. Set the tone.
+          </div>
+        ) : (
+          <ul className="divide-y divide-[var(--color-line)]">
+            {replies.map((r) => (
+              <li key={r.id} className="py-5">
+                <div className="mb-2 flex items-center gap-2 font-mono-label text-[10px] text-[var(--color-text-muted)]">
+                  <Avatar name={r.authorName} size="xs" />
+                  <span className="text-[var(--color-text)]">{r.authorName}</span>
+                  <span className="text-[var(--color-text-faint)]">/</span>
+                  <span suppressHydrationWarning>{formatRelative(r.createdAtISO)}</span>
+                </div>
+                <p className="prose-line text-sm leading-snug whitespace-pre-wrap">{r.body}</p>
+              </li>
+            ))}
+          </ul>
+        )}
+
+        {/* Reply composer */}
+        <form onSubmit={onSubmitReply} className="mt-8 space-y-3 border-t border-[var(--color-line)] pt-6">
+          <label className="font-mono-label text-[10px] text-[var(--color-text-faint)]">
+            Add a reply
+          </label>
+          <textarea
+            value={replyBody}
+            onChange={(e) => setReplyBody(e.target.value)}
+            rows={3}
+            placeholder={isAuthenticated ? "Keep it civil." : "Log in to reply."}
+            disabled={!isAuthenticated || posting}
+            className="w-full border-0 border-b border-[var(--color-line-strong)] bg-transparent px-0 py-2 text-sm placeholder:text-[var(--color-text-faint)] focus:border-[var(--color-primary)] focus:outline-none disabled:opacity-50"
+          />
+          {postError && (
+            <p role="alert" className="font-mono-label text-[10px] text-[var(--color-primary)]">{postError}</p>
+          )}
+          <div className="flex justify-end">
+            <Button
+              type="submit"
+              size="sm"
+              variant="primary"
+              loading={posting}
+              disabled={!replyBody.trim() || posting || !isAuthenticated}
+            >
+              {isAuthenticated ? "Post reply" : "Log in to reply"}
+            </Button>
+          </div>
+        </form>
       </section>
     </PageContainer>
   );

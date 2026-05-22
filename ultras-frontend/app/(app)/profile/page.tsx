@@ -60,10 +60,16 @@ export default function ProfilePage() {
           <p className="font-mono-label text-[10px] text-[var(--color-text-faint)]">
             My club
           </p>
-          <div className="mt-4 flex items-center gap-5">
+          {/* The whole club card now opens the team detail page (recent +
+              upcoming fixtures, current standing). The link wraps the badge
+              and metadata as one tap target — better than splitting them. */}
+          <Link
+            href={`/teams/${club.id}`}
+            className="group mt-4 flex items-center gap-5 transition"
+          >
             <ClubBadge club={club} size="lg" />
             <div className="min-w-0">
-              <p className="font-display text-2xl font-bold leading-tight tracking-[-0.02em]">
+              <p className="font-display text-2xl font-bold leading-tight tracking-[-0.02em] transition group-hover:text-[var(--color-primary)]">
                 {club.name}
               </p>
               <p className="prose-line mt-1 text-sm italic text-[var(--color-text-muted)]">
@@ -72,8 +78,11 @@ export default function ProfilePage() {
               <p className="mt-2 font-mono-label text-[10px] text-[var(--color-text-faint)]">
                 {club.region} / est. {club.founded}
               </p>
+              <p className="mt-3 font-mono-label text-[10px] text-[var(--color-text-muted)] transition group-hover:text-[var(--color-primary)]">
+                See fixtures and table position →
+              </p>
             </div>
-          </div>
+          </Link>
         </section>
       )}
 

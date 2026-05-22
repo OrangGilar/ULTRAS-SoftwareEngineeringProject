@@ -1,0 +1,35 @@
+# Build outputs
+.next/
+out/
+dist/
+
+# Dependencies (installed fresh inside container)
+node_modules/
+
+# Env files — must come via build args / runtime env, never copied in
+.env*
+!.env.example
+
+# IDE + OS
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+*.log
+
+# Git + CI
+.git/
+.gitignore
+.github/
+
+# Docker bookkeeping
+Dockerfile
+.dockerignore
+
+# Tests
+**/__tests__/
+**/*.test.ts
+**/*.test.tsx
+
+# Local Next cache
+.next/cache/
