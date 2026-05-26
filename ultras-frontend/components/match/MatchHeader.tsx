@@ -1,5 +1,7 @@
+"use client";
+
 import type { Match } from "@/app/types";
-import { getClub } from "@/lib/mock/clubs";
+import { useClubs } from "@/components/providers/ClubsProvider";
 import { ClubBadge } from "@/components/club/ClubBadge";
 import { formatKickoff } from "@/lib/utils";
 import { cn } from "@/lib/utils";
@@ -12,6 +14,7 @@ const STATUS_LABEL: Record<Match["status"], string> = {
 };
 
 export function MatchHeader({ match, hideScore }: { match: Match; hideScore?: boolean }) {
+  const { getClub } = useClubs();
   const home = getClub(match.homeId);
   const away = getClub(match.awayId);
   if (!home || !away) return null;

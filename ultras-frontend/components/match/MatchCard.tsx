@@ -1,7 +1,9 @@
+"use client";
+
 import Link from "next/link";
 import type { Match } from "@/app/types";
 import type { ApiMatch } from "@/lib/api";
-import { getClub } from "@/lib/mock/clubs";
+import { useClubs } from "@/components/providers/ClubsProvider";
 import { ClubBadge } from "@/components/club/ClubBadge";
 import { formatKickoff } from "@/lib/utils";
 import { cn } from "@/lib/utils";
@@ -24,11 +26,12 @@ const STATUS_LABEL: Record<Match["status"], string> = {
 };
 
 export function MatchCard({ match, userPrediction, variant = "default" }: MatchCardProps) {
+  const { getClub } = useClubs();
   const apiMatch = match as ApiMatch;
 
-  // Try the local clubs.ts first (rich Indonesian club metadata, crests, motto, etc.).
-  // If the slug isn't there (new team API-Football returned that we haven't mapped
-  // yet), fall back to the homeName/homeLogo the API gave us.
+  // Try the clubs catalog first (rich Indonesian club metadata — crests, motto, etc.).
+  // If the slug isn't there (brand-new team from API-Football we haven't seeded yet),
+  // fall back to the homeName/homeLogo the API gave us.
   const home = getClub(match.homeId);
   const away = getClub(match.awayId);
 

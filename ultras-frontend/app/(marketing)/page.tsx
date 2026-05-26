@@ -1,6 +1,8 @@
+"use client";
+
 import Link from "next/link";
 import { Button } from "@/components/ui/Button";
-import { clubs } from "@/lib/mock/clubs";
+import { useClubs } from "@/components/providers/ClubsProvider";
 
 const RITUALS = [
   {
@@ -21,6 +23,7 @@ const RITUALS = [
 ];
 
 export default function LandingPage() {
+  const { clubs } = useClubs();
   return (
     <div className="bg-[var(--color-bg)] text-[var(--color-text)]">
       <section className="mx-auto flex w-full max-w-screen-xl flex-col px-6 pb-24 pt-16 md:pt-24">
@@ -35,8 +38,7 @@ export default function LandingPage() {
         </h1>
 
         <p className="prose-line mt-12 text-[clamp(18px,2.2vw,28px)] leading-snug text-[var(--color-text-muted)]">
-          Predict every Liga 1 match. Earn points off your hottest takes.
-          Find your club. Stay loud.
+          Predict every match. Earn points. Find your club.
         </p>
 
         <div className="mt-12 flex flex-col items-start gap-4 sm:flex-row sm:items-center">

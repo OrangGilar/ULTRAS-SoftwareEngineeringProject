@@ -5,7 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { PageContainer, PageHeader, SectionHeading } from "@/components/layout/PageContainer";
 import { ThreadCard } from "@/components/community/ThreadCard";
-import { clubs } from "@/lib/mock/clubs";
+import { useClubs } from "@/components/providers/ClubsProvider";
 import { getThreads, type ApiThread, ApiError } from "@/lib/api";
 import { usePollingFetch } from "@/hooks/usePollingFetch";
 <<<<<<< HEAD
@@ -23,6 +23,7 @@ type Filter = "club" | "all";
  * always have a home — this page intentionally has no composer.
  */
 export default function CommunityPage() {
+  const { clubs } = useClubs();
   const [recent, setRecent] = useState<ApiThread[]>([]);
   const [loading, setLoading] = useState(true);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
@@ -62,7 +63,6 @@ export default function CommunityPage() {
       <PageHeader
         eyebrow="The terraces"
         title={<>Community.</>}
-        lede="Pick a club, join the chant. Each side has its own corner — keep your takes on-topic and your name on the team sheet."
       />
 
       <section>

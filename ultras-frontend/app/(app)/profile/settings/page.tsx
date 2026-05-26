@@ -4,15 +4,18 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useLocalUser, useResetUser } from "@/hooks/useLocalUser";
+import { useAuth } from "@/hooks/useAuth";
 import { PageContainer, PageHeader } from "@/components/layout/PageContainer";
 import { Button } from "@/components/ui/Button";
 import { ChevronLeft } from "lucide-react";
-import { clubs, getClub } from "@/lib/mock/clubs";
+import { useClubs } from "@/components/providers/ClubsProvider";
 
 export default function SettingsPage() {
   const router = useRouter();
   const { user, update, adoptClub } = useLocalUser();
+  const { clubs, getClub } = useClubs();
   const reset = useResetUser();
+  const { logout } = useAuth();
   const [name, setName] = useState(user.displayName);
   const [auto, setAuto] = useState(user.prefersAutoReveal);
   const [pickedClubId, setPickedClubId] = useState<string>(user.clubId ?? "");
@@ -147,20 +150,17 @@ export default function SettingsPage() {
 
       <section className="space-y-3 border-b border-[var(--color-line)] pb-6">
         <p className="font-display text-base font-bold tracking-[-0.01em]">
-          Reset local data
-        </p>
-        <p className="prose-line text-xs text-[var(--color-text-muted)]">
-          Clears predictions, points, and adopted club from this device.
+          Account
         </p>
         <div>
           <Button
             variant="danger"
             onClick={() => {
-              reset();
+              logout();
               router.push("/");
             }}
           >
-            Reset everything
+            Log out
           </Button>
         </div>
       </section>

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useLocalUser } from "@/hooks/useLocalUser";
-import { getClub } from "@/lib/mock/clubs";
+import { useClubs } from "@/components/providers/ClubsProvider";
 import { matches as allMatches } from "@/lib/mock/matches";
 import { scorePrediction } from "@/lib/scoring";
 import { PageContainer, SectionHeading } from "@/components/layout/PageContainer";
@@ -13,6 +13,7 @@ import { Settings } from "lucide-react";
 
 export default function ProfilePage() {
   const { user } = useLocalUser();
+  const { getClub } = useClubs();
   const club = getClub(user.clubId);
   const predictions = Object.values(user.predictions);
   const finishedPredictions = predictions

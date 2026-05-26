@@ -9,7 +9,7 @@ import { PageContainer, PageHeader } from "@/components/layout/PageContainer";
 import { ThreadCard } from "@/components/community/ThreadCard";
 import { Composer } from "@/components/community/Composer";
 import { useLocalUser } from "@/hooks/useLocalUser";
-import { getClub, GENERAL_COMMUNITY_TAG } from "@/lib/mock/clubs";
+import { useClubs, GENERAL_COMMUNITY_TAG } from "@/components/providers/ClubsProvider";
 import { getThreads, type ApiThread, ApiError } from "@/lib/api";
 
 /**
@@ -27,15 +27,18 @@ export default function ClubCommunityPage({
 }) {
   const { clubId } = use(params);
   const { user } = useLocalUser();
+  const { getClub, loading: clubsLoading } = useClubs();
 
   const isGeneral = clubId === "general";
   const club = isGeneral ? null : getClub(clubId);
 
-  // Unknown slug — 404 instead of silently showing an empty list.
-  if (!isGeneral && !club) notFound();
+  // Unknown slug — 404 instead of silently showing an empty list. We wait
+  // until the clubs catalog has loaded before declaring 404 so an
+  // in-flight fetch doesn't bounce a valid slug.
+  if (!isGeneral && !clubsLoading && !club) notFound();
 
   // Backend query tag: real club id, or the GENERAL sentinel for null-tag threads.
-  const filterTag = isGeneral ? GENERAL_COMMUNITY_TAG : club!.id;
+  const filterTag = isGeneral ? GENERAL_COMMUNITY_TAG : clubId;
 
   const [threads, setThreads] = useState<ApiThread[]>([]);
   const [loading, setLoading] = useState(true);
@@ -63,11 +66,14 @@ export default function ClubCommunityPage({
   // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => { refetch(); }, [refetch]);
 
-  const title = isGeneral ? "General" : club!.name;
-  const eyebrow = isGeneral ? "Off-topic / Liga 1" : club!.motto;
+  // Fall back to the slug while the clubs catalog is still loading so the
+  // first paint isn't a crash.
+  const clubName = club?.name ?? clubId;
+  const title = isGeneral ? "General" : clubName;
+  const eyebrow = isGeneral ? "Off-topic / Liga 1" : (club?.motto ?? "");
   const lede = isGeneral
     ? "Anything that doesn't fit a club community. League talk, refs, transfers, whatever."
-    : `Everything ${club!.name}.`;
+    : `Everything ${clubName}.`;
 
   return (
     <PageContainer width="md" className="space-y-10">

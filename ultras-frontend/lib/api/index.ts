@@ -3,6 +3,9 @@ export { login, logout, register } from "./auth";
 export type { AuthResponse, LoginPayload, RegisterPayload } from "./auth";
 export { getMatches, getLiveMatches, getMatch, forceSyncMatches } from "./matches";
 export type { ApiMatch } from "./matches";
+export { getClubs, getClubById } from "./clubs";
+export { getGames, getGame, getTriviaQuestions, getCrestQuestions } from "./games";
+export type { ApiTriviaQuestion, ApiCrestQuestion } from "./games";
 export { getStandings, getTeamStanding, getTeamMatches } from "./standings";
 export {
   getThreads,

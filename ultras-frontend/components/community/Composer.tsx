@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/Button";
 import { Plus } from "lucide-react";
 import { createThread, ApiError } from "@/lib/api";
 import { useAuth } from "@/hooks/useAuth";
-import { getClub } from "@/lib/mock/clubs";
+import { useClubs } from "@/components/providers/ClubsProvider";
 
 /**
  * Composer for new threads. Posts to POST /api/threads and bubbles a refetch
@@ -37,6 +37,7 @@ export function Composer({
 }) {
   const router = useRouter();
   const { isAuthenticated } = useAuth();
+  const { getClub } = useClubs();
 
   const [title, setTitle] = useState("");
   const [body, setBody] = useState("");

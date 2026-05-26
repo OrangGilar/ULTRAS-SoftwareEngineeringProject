@@ -3,17 +3,18 @@
 import { useState } from "react";
 import Link from "next/link";
 import type { Game } from "@/app/types";
+import type { ApiCrestQuestion } from "@/lib/api/games";
 import { GameShell } from "@/components/games/GameShell";
 import { Button } from "@/components/ui/Button";
-import { crestQuestions } from "@/lib/mock/games";
-import { clubsById } from "@/lib/mock/clubs";
+import { useGames } from "@/components/providers/GamesProvider";
+import { useClubs } from "@/components/providers/ClubsProvider";
 import { useLocalUser } from "@/hooks/useLocalUser";
 import { cn, shuffle } from "@/lib/utils";
 
 type CrestQ = { clubId: string; choices: string[]; answerIndex: number };
 
-function buildCrestRound(): CrestQ[] {
-  return shuffle(crestQuestions).slice(0, 4).map((q) => {
+function buildCrestRound(pool: ApiCrestQuestion[]): CrestQ[] {
+  return shuffle(pool).slice(0, 4).map((q) => {
     const correct = q.choices[q.answerIndex];
     const choices = shuffle([...q.choices]);
     return { ...q, choices, answerIndex: choices.indexOf(correct) };
@@ -22,33 +23,44 @@ function buildCrestRound(): CrestQ[] {
 
 export function CrestGame({ game }: { game: Game }) {
   const { recordGameScore } = useLocalUser();
+  const { crestQuestions } = useGames();
+  const { clubsById } = useClubs();
   const [phase, setPhase] = useState<"intro" | "playing" | "done">("intro");
-  const [questions, setQuestions] = useState<CrestQ[]>(() => buildCrestRound());
+  const [questions, setQuestions] = useState<CrestQ[]>([]);
   const [idx, setIdx] = useState(0);
   const [score, setScore] = useState(0);
   const [picked, setPicked] = useState<number | null>(null);
 
   const q = questions[idx];
-  const club = clubsById[q.clubId];
+  const club = q ? clubsById[q.clubId] : undefined;
+  const roundSize = questions.length || 4;
 
   return (
     <GameShell
       title={game.name}
-      subtitle={`Round ${Math.min(idx + 1, questions.length)} of ${questions.length}`}
+      subtitle={`Round ${Math.min(idx + 1, roundSize)} of ${roundSize}`}
       score={score}
     >
       {phase === "intro" && (
         <div className="mx-auto max-w-md space-y-6 py-12 text-center">
           <p className="prose-line text-base text-[var(--color-text-muted)]">
-            We blur the crest. You name the club. {crestQuestions.length} rounds. 3+ wins {game.rewardPerWin} pts.
+            We blur the crest. You name the club. 3+ wins {game.rewardPerWin} pts.
           </p>
-          <Button onClick={() => { setQuestions(buildCrestRound()); setPhase("playing"); }} size="lg">
+          <Button
+            onClick={() => {
+              const round = buildCrestRound(crestQuestions);
+              setQuestions(round);
+              setPhase("playing");
+            }}
+            size="lg"
+            disabled={crestQuestions.length === 0}
+          >
             Start
           </Button>
         </div>
       )}
 
-      {phase === "playing" && club && (
+      {phase === "playing" && club && q && (
         <div className="space-y-8">
           <div
             className="mx-auto grid h-48 w-48 place-items-center text-7xl"
@@ -112,7 +124,7 @@ export function CrestGame({ game }: { game: Game }) {
           </p>
           <p className="font-display text-7xl font-bold tabular-nums leading-none tracking-[-0.04em] md:text-8xl">
             {score}
-            <span className="text-[var(--color-text-faint)]">/{questions.length}</span>
+            <span className="text-[var(--color-text-faint)]">/{roundSize}</span>
           </p>
           {score >= 3 ? (
             <p className="font-mono-label text-xs text-[var(--color-primary)]">
@@ -126,7 +138,8 @@ export function CrestGame({ game }: { game: Game }) {
           <div className="flex flex-col items-center gap-3">
             <Button
               onClick={() => {
-                setQuestions(buildCrestRound());
+                const round = buildCrestRound(crestQuestions);
+                setQuestions(round);
                 setPhase("intro");
                 setIdx(0);
                 setScore(0);

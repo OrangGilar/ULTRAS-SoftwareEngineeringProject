@@ -1,14 +1,14 @@
 "use client";
 
 import Link from "next/link";
-import { Bell } from "lucide-react";
 import { useLocalUser } from "@/hooks/useLocalUser";
-import { getClub } from "@/lib/mock/clubs";
+import { useClubs } from "@/components/providers/ClubsProvider";
 import { Avatar } from "@/components/ui/Avatar";
 import { PointsBalance } from "@/components/rewards/PointsBalance";
 
 export function TopBar() {
   const { user } = useLocalUser();
+  const { getClub } = useClubs();
   const club = getClub(user.clubId);
 
   return (
@@ -31,16 +31,8 @@ export function TopBar() {
         </Link>
 
         <div className="flex items-center gap-3">
-          <PointsBalance compact />
-          <button
-            type="button"
-            aria-label="Notifications"
-            className="relative grid h-9 w-9 place-items-center rounded-[var(--radius-pill)] border border-[var(--color-line)] text-[var(--color-text-muted)] transition hover:border-[var(--color-text)] hover:text-[var(--color-text)]"
-          >
-            <Bell size={15} />
-            <span className="absolute right-1.5 top-1.5 h-1.5 w-1.5 rounded-full bg-[var(--color-primary)]" />
-          </button>
-          <Link href="/profile" aria-label="Profile">
+<PointsBalance compact />
+<Link href="/profile" aria-label="Profile">
             <Avatar name={user.displayName} logo={club?.logo} emoji={club?.crestEmoji} size="sm" />
           </Link>
         </div>

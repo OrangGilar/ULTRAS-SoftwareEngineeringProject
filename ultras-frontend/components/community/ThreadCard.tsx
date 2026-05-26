@@ -7,7 +7,7 @@ import { ArrowBigUp, Trash2, MoveRight } from "lucide-react";
 import type { ApiThread } from "@/lib/api";
 import { toggleUpvote, deleteThread, moveThread, ApiError } from "@/lib/api";
 import { Avatar } from "@/components/ui/Avatar";
-import { getClub } from "@/lib/mock/clubs";
+import { useClubs } from "@/components/providers/ClubsProvider";
 import { useAuth } from "@/hooks/useAuth";
 import { cn, formatRelative } from "@/lib/utils";
 
@@ -34,6 +34,7 @@ export function ThreadCard({
 }) {
   const router = useRouter();
   const { isAuthenticated, auth } = useAuth();
+  const { getClub } = useClubs();
   const authorClub = getClub(thread.authorClubId);
   const threadClub = getClub(thread.clubId);
 

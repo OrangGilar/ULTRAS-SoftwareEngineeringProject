@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState, use, useCallback } from "react";
 import { notFound, useRouter } from "next/navigation";
-import { getClub } from "@/lib/mock/clubs";
+import { useClubs } from "@/components/providers/ClubsProvider";
 import { PageContainer } from "@/components/layout/PageContainer";
 import { Avatar } from "@/components/ui/Avatar";
 import { Button } from "@/components/ui/Button";
@@ -47,6 +47,7 @@ export default function ThreadPage({
   const { threadId } = use(params);
   const router = useRouter();
   const { isAuthenticated, auth } = useAuth();
+  const { getClub } = useClubs();
 
   const [data, setData] = useState<ApiThreadDetail | null>(null);
   const [loading, setLoading] = useState(true);

@@ -3,17 +3,18 @@
 import { useState } from "react";
 import Link from "next/link";
 import type { Game } from "@/app/types";
+import type { ApiTriviaQuestion } from "@/lib/api/games";
 import { GameShell } from "@/components/games/GameShell";
 import { Button } from "@/components/ui/Button";
-import { triviaQuestions } from "@/lib/mock/games";
+import { useGames } from "@/components/providers/GamesProvider";
 import { useLocalUser } from "@/hooks/useLocalUser";
 import { cn, shuffle } from "@/lib/utils";
 
 type TriviaQ = { prompt: string; choices: string[]; answerIndex: number };
 type Phase = "intro" | "playing" | "done";
 
-function buildRound(): TriviaQ[] {
-  return shuffle(triviaQuestions).slice(0, 5).map((q) => {
+function buildRound(pool: ApiTriviaQuestion[]): TriviaQ[] {
+  return shuffle(pool).slice(0, 5).map((q) => {
     const correct = q.choices[q.answerIndex];
     const choices = shuffle([...q.choices]);
     return { ...q, choices, answerIndex: choices.indexOf(correct) };
@@ -22,20 +23,22 @@ function buildRound(): TriviaQ[] {
 
 export function TriviaGame({ game }: { game: Game }) {
   const { recordGameScore } = useLocalUser();
+  const { triviaQuestions } = useGames();
   const [phase, setPhase] = useState<Phase>("intro");
-  const [questions, setQuestions] = useState<TriviaQ[]>(() => buildRound());
+  const [questions, setQuestions] = useState<TriviaQ[]>([]);
   const [idx, setIdx] = useState(0);
   const [score, setScore] = useState(0);
   const [picked, setPicked] = useState<number | null>(null);
 
   const q = questions[idx];
+  const roundSize = questions.length || 5;
 
   const onPick = (i: number) => {
     if (picked !== null) return;
     setPicked(i);
     if (i === q.answerIndex) setScore((s) => s + 1);
     setTimeout(() => {
-      const isLast = idx >= triviaQuestions.length - 1;
+      const isLast = idx >= questions.length - 1;
       if (isLast) {
         const finalScore = score + (i === q.answerIndex ? 1 : 0);
         const reward = finalScore >= 3 ? game.rewardPerWin : 0;
@@ -51,7 +54,7 @@ export function TriviaGame({ game }: { game: Game }) {
   return (
     <GameShell
       title={game.name}
-      subtitle={`Q${Math.min(idx + 1, triviaQuestions.length)} of ${triviaQuestions.length}`}
+      subtitle={`Q${Math.min(idx + 1, roundSize)} of ${roundSize}`}
       score={score}
     >
       {phase === "intro" && (
@@ -59,13 +62,21 @@ export function TriviaGame({ game }: { game: Game }) {
           <p className="prose-line text-base text-[var(--color-text-muted)]">
             Answer 5 quick questions on Liga 1. 3+ correct unlocks {game.rewardPerWin} pts.
           </p>
-          <Button onClick={() => { setQuestions(buildRound()); setPhase("playing"); }} size="lg">
+          <Button
+            onClick={() => {
+              const round = buildRound(triviaQuestions);
+              setQuestions(round);
+              setPhase("playing");
+            }}
+            size="lg"
+            disabled={triviaQuestions.length === 0}
+          >
             Start
           </Button>
         </div>
       )}
 
-      {phase === "playing" && (
+      {phase === "playing" && q && (
         <div className="space-y-8">
           <h2 className="font-display text-2xl font-bold leading-tight tracking-[-0.02em] md:text-3xl">
             {q.prompt}
@@ -102,7 +113,7 @@ export function TriviaGame({ game }: { game: Game }) {
           </p>
           <p className="font-display text-7xl font-bold tabular-nums leading-none tracking-[-0.04em] md:text-8xl">
             {score}
-            <span className="text-[var(--color-text-faint)]">/{triviaQuestions.length}</span>
+            <span className="text-[var(--color-text-faint)]">/{roundSize}</span>
           </p>
           {score >= 3 ? (
             <p className="font-mono-label text-xs text-[var(--color-primary)]">
@@ -116,7 +127,8 @@ export function TriviaGame({ game }: { game: Game }) {
           <div className="flex flex-col items-center gap-3">
             <Button
               onClick={() => {
-                setQuestions(buildRound());
+                const round = buildRound(triviaQuestions);
+                setQuestions(round);
                 setPhase("intro");
                 setIdx(0);
                 setScore(0);
