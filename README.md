@@ -1,2 +1,0 @@
-# ULTRAS-SoftwareEngineeringProject
-Fairuz

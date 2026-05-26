@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import type { Confidence, Match } from "@/app/types";
-import { getClub } from "@/lib/mock/clubs";
+import { useClubs } from "@/components/providers/ClubsProvider";
 import { ScorePicker } from "./ScorePicker";
 import { Button } from "@/components/ui/Button";
 import { Modal } from "@/components/ui/Modal";
@@ -15,6 +15,7 @@ export type PredictionFormProps = {
 };
 
 export function PredictionForm({ match, onSaved }: PredictionFormProps) {
+  const { getClub } = useClubs();
   const home = getClub(match.homeId);
   const away = getClub(match.awayId);
   const { user, savePrediction } = useLocalUser();

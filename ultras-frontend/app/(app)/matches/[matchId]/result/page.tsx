@@ -1,20 +1,42 @@
+"use client";
+
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { getMatch, upcomingMatches } from "@/lib/mock/matches";
-import { getClub } from "@/lib/mock/clubs";
+import { use } from "react";
+import { useMatch, useMatches } from "@/hooks/useMatches";
+import { useClubs } from "@/components/providers/ClubsProvider";
 import { Button } from "@/components/ui/Button";
 import { ChevronLeft, ArrowRight } from "lucide-react";
 import { MatchResultClient } from "./Client";
 
-export default async function MatchResultPage({
+export default function MatchResultPage({
   params,
 }: {
   params: Promise<{ matchId: string }>;
 }) {
-  const { matchId } = await params;
-  const match = getMatch(matchId);
-  if (!match) notFound();
+  const { matchId } = use(params);
+  const matchState = useMatch(matchId);
+  const allMatchesState = useMatches();
+  const { getClub, loading: clubsLoading } = useClubs();
 
+  if (matchState.status === "loading" || clubsLoading) {
+    return (
+      <div className="border border-dashed border-[var(--color-line)] py-16 text-center font-mono-label text-xs text-[var(--color-text-muted)]">
+        Loading match…
+      </div>
+    );
+  }
+
+  if (matchState.status === "error") {
+    if (matchState.error.status === 404) notFound();
+    return (
+      <div role="alert" className="border border-[var(--color-primary)] py-10 px-5 font-mono-label text-xs text-[var(--color-primary)]">
+        Couldn't load this match: {matchState.error.message}
+      </div>
+    );
+  }
+
+  const match = matchState.data;
   const home = getClub(match.homeId);
   const away = getClub(match.awayId);
   if (!home || !away) notFound();
@@ -56,7 +78,10 @@ export default async function MatchResultPage({
     );
   }
 
-  const next = upcomingMatches()[0];
+  const allMatches = allMatchesState.status === "success" ? allMatchesState.data : [];
+  const next = allMatches
+    .filter((m) => m.status === "upcoming")
+    .sort((a, b) => a.kickoffISO.localeCompare(b.kickoffISO))[0];
   const nextHome = next ? getClub(next.homeId) : null;
   const nextAway = next ? getClub(next.awayId) : null;
 

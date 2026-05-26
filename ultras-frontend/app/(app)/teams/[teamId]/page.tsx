@@ -9,7 +9,7 @@ import { MatchCard } from "@/components/match/MatchCard";
 import { ClubBadge } from "@/components/club/ClubBadge";
 import { useLocalUser } from "@/hooks/useLocalUser";
 import { useTeamMatches, useTeamStanding } from "@/hooks/useStandings";
-import { getClub } from "@/lib/mock/clubs";
+import { useClubs } from "@/components/providers/ClubsProvider";
 import type { ApiMatch } from "@/lib/api";
 import type { Club, TeamStanding } from "@/app/types";
 
@@ -40,8 +40,9 @@ export default function TeamPage({
 
   const matchesState = useTeamMatches(teamId);
   const standingState = useTeamStanding(teamId);
+  const { getClub } = useClubs();
 
-  // Local clubs.ts is the source of truth for branding when available; fall
+  // Clubs catalog is the source of truth for branding when available; fall
   // back to whatever the API returned via the standings/match payloads.
   const club = getClub(teamId);
   const apiName =

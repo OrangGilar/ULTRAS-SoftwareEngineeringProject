@@ -1,5 +1,4 @@
 import type { Club, QuizQuestion, QuizWeights } from "@/app/types";
-import { clubs } from "./clubs";
 
 export const quizQuestions: QuizQuestion[] = [
   {
@@ -277,37 +276,28 @@ export const quizQuestions: QuizQuestion[] = [
     prompt: "Rivalry energy?",
     helper: "How much heat is too much?",
     choices: [
-      { id: "a", label: "Lean all the way in, the calendar revolves around it", weights: { ultras: 3 } },
-      { id: "b", label: "Loud on the day, civil after", weights: { ultras: 1, family: 2 } },
-      { id: "c", label: "Above it. Football is enough", weights: { pragmatic: 2, family: 1 } },
+      { id: "a", label: "Banter everytime", weights: { ultras: 3 } },
+      { id: "b", label: "Banter on the pitch, chill off the pitch", weights: { ultras: 1, family: 2 } },
+      { id: "c", label: "Chill", weights: { pragmatic: 2, family: 1 } },
     ],
   },
   {
     id: "q15",
     prompt: "Squad rotation philosophy?",
     choices: [
-      { id: "a", label: "Best XI every week, ride or die", weights: { veteran: 2, pragmatic: 1 } },
-      { id: "b", label: "Rotate hard, fresh legs win Aprils", weights: { pragmatic: 2, attacking: 1 } },
-      { id: "c", label: "Throw the kids in, sink or swim", weights: { youth: 3 } },
+      { id: "a", label: "Always use best starting lineup", weights: { veteran: 2, pragmatic: 1 } },
+      { id: "b", label: "Often rotate the starting lineup", weights: { pragmatic: 2, attacking: 1 } },
+      { id: "c", label: "Play the youngsters", weights: { youth: 3 } },
     ],
   },
   {
     id: "q16",
-    prompt: "Set-piece routine, what's yours?",
+    prompt: "Set-piece routine?",
     choices: [
-      { id: "a", label: "Whipped near post, target the centre-half", weights: { attacking: 2, veteran: 1 } },
-      { id: "b", label: "Short corner, work the overload", weights: { pragmatic: 3 } },
-      { id: "c", label: "Direct on goal, dare the keeper", weights: { attacking: 3 } },
-      { id: "d", label: "Trick play, free-kick over the wall", weights: { youth: 1, attacking: 2 } },
-    ],
-  },
-  {
-    id: "q17",
-    prompt: "Promotion and relegation drama, your stance?",
-    choices: [
-      { id: "a", label: "Bring the chaos, last-day survival is theatre", weights: { underdog: 3, ultras: 1 } },
-      { id: "b", label: "Stable mid-table, a season without ulcers", weights: { pragmatic: 2, family: 1 } },
-      { id: "c", label: "Title race or nothing, every match a final", weights: { history: 2, attacking: 1 } },
+      { id: "a", label: "Near post", weights: { attacking: 2, veteran: 1 } },
+      { id: "b", label: "Short corner", weights: { pragmatic: 3 } },
+      { id: "c", label: "Direct on goal", weights: { attacking: 3 } },
+      { id: "d", label: "Trick play", weights: { youth: 1, attacking: 2 } },
     ],
   },
 ];
@@ -329,7 +319,7 @@ export type QuizMatch = {
   reasons: string[];
 };
 
-export function recommendClubs(answers: QuizAnswer[]): QuizMatch[] {
+export function recommendClubs(answers: QuizAnswer[], clubs: Club[]): QuizMatch[] {
   const totals: Partial<QuizWeights> = {};
   for (const a of answers) {
     const q = quizQuestions.find((qq) => qq.id === a.questionId);
@@ -372,11 +362,14 @@ export function recommendClubs(answers: QuizAnswer[]): QuizMatch[] {
     return { club, score, reasons: dedupe(reasons) };
   });
 
-  const max = Math.max(1, ...scored.map((s) => s.score));
+  // Theoretical max: every accumulated point applied at the highest multiplier (1.4 = region)
+  const totalPoints = Math.max(1, Object.values(totals).reduce((s, v) => s + (v ?? 0), 0));
+  const theoreticalMax = totalPoints * 1.4;
+
   return scored
     .map((s) => ({
       club: s.club,
-      matchPercent: Math.round(Math.min(99, 45 + (s.score / max) * 54)),
+      matchPercent: Math.max(10, Math.round((s.score / theoreticalMax) * 100)),
       reasons: s.reasons.slice(0, 4),
     }))
     .sort((a, b) => b.matchPercent - a.matchPercent)

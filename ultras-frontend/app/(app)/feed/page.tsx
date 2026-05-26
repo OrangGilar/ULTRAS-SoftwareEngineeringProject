@@ -2,22 +2,43 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { upcomingMatches, finishedMatches } from "@/lib/mock/matches";
-import { games } from "@/lib/mock/games";
-import { getClub, clubs } from "@/lib/mock/clubs";
+import { useGames } from "@/components/providers/GamesProvider";
+import { useClubs } from "@/components/providers/ClubsProvider";
 import { PageContainer, PageHeader, SectionHeading } from "@/components/layout/PageContainer";
 import { MatchCard } from "@/components/match/MatchCard";
 import { GameTile } from "@/components/games/GameTile";
 import { PointsBalance } from "@/components/rewards/PointsBalance";
 import { useLocalUser } from "@/hooks/useLocalUser";
+import { useAuth } from "@/hooks/useAuth";
+import { useMatches } from "@/hooks/useMatches";
 
 const FEATURED_CLUB_IDS = ["persib", "persija", "psm"];
 
+// Cheap string→int hash so each account picks a stable but different match.
+function hash(s: string): number {
+  let h = 0;
+  for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) | 0;
+  return Math.abs(h);
+}
+
 export default function FeedPage() {
   const { user } = useLocalUser();
+  const { auth } = useAuth();
+  const matchesState = useMatches();
+  const { games } = useGames();
+  const { clubs, getClub } = useClubs();
   const club = getClub(user.clubId);
-  const upcoming = upcomingMatches();
-  const recentResult = finishedMatches()[0];
+
+  const allMatches = matchesState.status === "success" ? matchesState.data : [];
+  const upcoming = allMatches
+    .filter((m) => m.status === "upcoming")
+    .sort((a, b) => a.kickoffISO.localeCompare(b.kickoffISO));
+  const finished = allMatches
+    .filter((m) => m.status === "finished")
+    .sort((a, b) => b.kickoffISO.localeCompare(a.kickoffISO));
+
+  const seed = auth?.userId ?? user.displayName ?? "guest";
+  const recentResult = finished.length > 0 ? finished[hash(seed) % finished.length] : undefined;
   const yourNext =
     upcoming.find((m) => m.homeId === user.clubId || m.awayId === user.clubId) ?? upcoming[0];
   const homeClub = recentResult ? getClub(recentResult.homeId) : null;
@@ -46,7 +67,7 @@ export default function FeedPage() {
         }
       />
 
-      <PointsBalance />
+<PointsBalance />
 
       {recentResult && homeClub && awayClub && (
         <section>

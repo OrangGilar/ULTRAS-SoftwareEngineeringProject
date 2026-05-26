@@ -1,5 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
+import { ClubsProvider } from "@/components/providers/ClubsProvider";
+import { GamesProvider } from "@/components/providers/GamesProvider";
 
 export const metadata: Metadata = {
   title: "Ultras. For the terraces.",
@@ -22,7 +24,7 @@ export default function RootLayout({
         <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Playfair+Display:ital@1&display=swap" rel="stylesheet" />
       </head>
       <body className="min-h-screen bg-[var(--color-bg)] text-[var(--color-text)] font-sans antialiased">
-        {children}
+        <ClubsProvider><GamesProvider>{children}</GamesProvider></ClubsProvider>
       </body>
     </html>
   );

@@ -4,7 +4,7 @@ import type { Match } from "@/app/types";
 /**
  * The backend's FrontendMatch DTO is a superset of the frontend's Match type
  * (it adds homeName/awayName/homeLogo/awayLogo for fallbacks when the slug
- * isn't in lib/mock/clubs.ts).
+ * isn't in the clubs catalog).
  */
 export type ApiMatch = Match & {
   homeName?: string;

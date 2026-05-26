@@ -7,24 +7,29 @@ import { ClubRecommendationCard } from "@/components/club/ClubRecommendationCard
 import { Button } from "@/components/ui/Button";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { useLocalUser } from "@/hooks/useLocalUser";
+import { useClubs } from "@/components/providers/ClubsProvider";
 
 const STORAGE_KEY = "ultras:quiz:answers:v1";
 
 export default function QuizResultPage() {
   const router = useRouter();
   const { adoptClub } = useLocalUser();
+  const { clubs, loading: clubsLoading } = useClubs();
   const [results, setResults] = useState<QuizMatch[] | null>(null);
   const [activeIdx, setActiveIdx] = useState(0);
   const [adopted, setAdopted] = useState(false);
 
   useEffect(() => {
+    // Wait for the clubs catalog before scoring — otherwise we'd recommend
+    // against an empty list.
+    if (clubsLoading || clubs.length === 0) return;
     const t = setTimeout(() => {
       const raw = typeof window !== "undefined" ? window.localStorage.getItem(STORAGE_KEY) : null;
       const answers: QuizAnswer[] = raw ? JSON.parse(raw) : [];
-      setResults(recommendClubs(answers));
+      setResults(recommendClubs(answers, clubs));
     }, 600);
     return () => clearTimeout(t);
-  }, []);
+  }, [clubs, clubsLoading]);
 
   if (!results) {
     return (

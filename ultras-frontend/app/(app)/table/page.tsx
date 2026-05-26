@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { PageContainer, PageHeader } from "@/components/layout/PageContainer";
 import { useStandings } from "@/hooks/useStandings";
-import { getClub } from "@/lib/mock/clubs";
+import { useClubs } from "@/components/providers/ClubsProvider";
 import { cn } from "@/lib/utils";
 import type { TeamStanding } from "@/app/types";
 
@@ -80,8 +80,9 @@ export default function TablePage() {
 }
 
 function StandingRow({ row }: { row: TeamStanding }) {
-  // Prefer the local clubs.ts entry for crest + short name (richer art) and fall
+  // Prefer the clubs catalog entry for crest + short name (richer art) and fall
   // back to whatever the API gave us if this team isn't mapped yet.
+  const { getClub } = useClubs();
   const club = getClub(row.teamId);
   const displayLogo = club?.logo ?? row.teamLogo;
   const displayName = club?.name ?? row.teamName;

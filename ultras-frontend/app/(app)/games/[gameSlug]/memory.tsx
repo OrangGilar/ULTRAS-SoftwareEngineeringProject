@@ -1,18 +1,18 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import type { Game } from "@/app/types";
 import { GameShell } from "@/components/games/GameShell";
 import { Button } from "@/components/ui/Button";
-import { clubs } from "@/lib/mock/clubs";
+import { useClubs } from "@/components/providers/ClubsProvider";
 import { useLocalUser } from "@/hooks/useLocalUser";
 import { cn } from "@/lib/utils";
 
 type Card = { id: number; clubId: string; matched: boolean; flipped: boolean };
 
-function buildDeck(): Card[] {
-  const sample = clubs.slice(0, 6);
+function buildDeck(clubsList: { id: string }[]): Card[] {
+  const sample = clubsList.slice(0, 6);
   const pairs = sample.flatMap((c, i) => [
     { id: i * 2, clubId: c.id, matched: false, flipped: false },
     { id: i * 2 + 1, clubId: c.id, matched: false, flipped: false },
@@ -26,6 +26,7 @@ function buildDeck(): Card[] {
 
 export function MemoryGame({ game }: { game: Game }) {
   const { recordGameScore } = useLocalUser();
+  const { clubs, clubsById } = useClubs();
   const [phase, setPhase] = useState<"intro" | "playing" | "done">("intro");
   const [deck, setDeck] = useState<Card[]>([]);
   const [first, setFirst] = useState<number | null>(null);
@@ -69,7 +70,7 @@ export function MemoryGame({ game }: { game: Game }) {
   }, [matched, total, moves, phase, game, recordGameScore]);
 
   const reset = () => {
-    setDeck(buildDeck());
+    setDeck(buildDeck(clubs));
     setFirst(null);
     setSecond(null);
     setMoves(0);
@@ -83,7 +84,7 @@ export function MemoryGame({ game }: { game: Game }) {
     else if (second === null && id !== first) setSecond(id);
   };
 
-  const club = useMemo(() => Object.fromEntries(clubs.map((c) => [c.id, c])), []);
+  const club = clubsById;
 
   return (
     <GameShell title={game.name} subtitle={`Moves ${moves}`} score={matched}>
