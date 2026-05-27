@@ -1,0 +1,38 @@
+.env
+.env.local
+.env.*.local
+**/.env
+**/.env.local
+
+# Keep example files committed (no real secrets):
+!.env.example
+!**/.env.example
+
+# ---- IDE / editor metadata ---------------------------------------------
+.idea/
+.vscode/
+*.iml
+*.iws
+*.swp
+*.swo
+
+# ---- OS junk -----------------------------------------------------------
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ---- Java / Gradle build outputs (root-level safety net) ---------------
+**/build/
+**/.gradle/
+**/out/
+*.log
+
+# ---- Node / Next build outputs (root-level safety net) -----------------
+**/node_modules/
+**/.next/
+**/dist/
+
+# ---- Docker scratch ----------------------------------------------------
+# Don't track docker-compose override files; those are per-developer.
+docker-compose.override.yml
+docker-compose.override.yaml

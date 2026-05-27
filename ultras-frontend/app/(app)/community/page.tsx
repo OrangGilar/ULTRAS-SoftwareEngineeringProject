@@ -8,11 +8,6 @@ import { ThreadCard } from "@/components/community/ThreadCard";
 import { useClubs } from "@/components/providers/ClubsProvider";
 import { getThreads, type ApiThread, ApiError } from "@/lib/api";
 import { usePollingFetch } from "@/hooks/usePollingFetch";
-<<<<<<< HEAD
-
-type Filter = "club" | "all";
-=======
->>>>>>> 3cedad9051b9ff06915df5d11f90cb14488ff9d3
 
 /**
  * Community landing. Two stacked sections:

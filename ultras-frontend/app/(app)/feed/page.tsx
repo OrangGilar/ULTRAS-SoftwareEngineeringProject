@@ -9,6 +9,7 @@ import { MatchCard } from "@/components/match/MatchCard";
 import { GameTile } from "@/components/games/GameTile";
 import { PointsBalance } from "@/components/rewards/PointsBalance";
 import { useLocalUser } from "@/hooks/useLocalUser";
+<<<<<<< Updated upstream
 import { useAuth } from "@/hooks/useAuth";
 import { useMatches } from "@/hooks/useMatches";
 
@@ -20,6 +21,10 @@ function hash(s: string): number {
   for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) | 0;
   return Math.abs(h);
 }
+=======
+
+const FEATURED_CLUB_IDS = ["persib", "persija", "psm"];
+>>>>>>> Stashed changes
 
 export default function FeedPage() {
   const { user } = useLocalUser();
