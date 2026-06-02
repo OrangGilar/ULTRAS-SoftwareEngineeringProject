@@ -29,7 +29,7 @@ services:
       # CORS — must include the frontend's URL or all browser calls 403.
       # Use the host-mapped port (localhost:3000), not the compose service name,
       # because the browser running on the host is what makes the request.
-      ULTRAS_ALLOWED_ORIGINS:     http://localhost:3000
+      ULTRAS_ALLOWED_ORIGINS: http://localhost:3001
       # API-Football
       APIFOOTBALL_API_KEY:        ${APIFOOTBALL_API_KEY}
       APIFOOTBALL_LIGA1_SEASON:   ${APIFOOTBALL_LIGA1_SEASON:-2024}
@@ -53,7 +53,7 @@ services:
         NEXT_PUBLIC_API_URL: http://localhost:8080
     container_name: ultras-frontend
     ports:
-      - "3000:3000"
+      - "3001:3000"
     depends_on:
       backend:
         condition: service_started

@@ -1,25 +1,17 @@
 # syntax=docker/dockerfile:1.7
 #
-# Multi-stage build for the Next.js frontend.
+# Multi-stage build for Next.js 16 frontend.
 #
-#   Stage 1 (deps):     Just installs node_modules. Cached on package*.json hash.
-#   Stage 2 (builder):  Next.js production build using the deps from stage 1.
-#   Stage 3 (runner):   Minimal runtime — only the .next/standalone output,
-#                       static assets, and public/. Final image ~150 MB.
-#
-# This relies on Next's "standalone" output mode (next.config.ts has
-# `output: "standalone"`). That mode bundles only the JS files actually
-# imported by the build, drastically smaller than copying node_modules.
+# Next.js 16 changed the standalone server startup — the server entry point
+# is now .next/standalone/server.js but it must be started from the correct
+# working directory and with HOST (not HOSTNAME) set to 0.0.0.0.
 
 # ---------- Stage 1: install dependencies ----------
 FROM node:20-alpine AS deps
 WORKDIR /app
 
-# libc6-compat needed for some npm packages that ship glibc-linked binaries
-# (sharp, swc native bindings). Cheap to include.
 RUN apk add --no-cache libc6-compat
 
-# Cache key: only the lockfile + manifest. Code changes don't re-install deps.
 COPY package.json package-lock.json* ./
 RUN npm ci --no-audit --no-fund
 
@@ -30,13 +22,8 @@ WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
-# NEXT_TELEMETRY_DISABLED stops Next from phoning home during build. Quiet
-# logs + faster builds + no surprise outbound traffic from CI.
 ENV NEXT_TELEMETRY_DISABLED=1
 
-# Build-time public env vars. NEXT_PUBLIC_API_URL must be available here, not
-# at runtime — Next bakes NEXT_PUBLIC_* into the client bundle at build time.
-# Defaults to localhost for local builds; overridden via --build-arg in CI.
 ARG NEXT_PUBLIC_API_URL=http://localhost:8080
 ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
 
@@ -52,19 +39,19 @@ ENV NEXT_TELEMETRY_DISABLED=1
 RUN addgroup --system --gid 1001 nodejs && \
     adduser --system --uid 1001 nextjs
 
-# `.next/standalone` is a self-contained build with its own minimal node_modules.
-# `.next/static` is copied separately because the standalone server expects it
-# under .next/static at runtime (not bundled in for cache-busting reasons).
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 COPY --from=builder --chown=nextjs:nodejs /app/public ./public
 
 USER nextjs
+
 EXPOSE 3000
 
-# HOSTNAME=0.0.0.0 is required — Next's standalone server binds to localhost
-# by default, which inside a container means "not reachable from outside".
-ENV HOSTNAME=0.0.0.0
 ENV PORT=3000
+# Next.js 15+ uses HOST instead of HOSTNAME to bind to all interfaces.
+# Without this, the standalone server binds to 127.0.0.1 (localhost inside
+# the container), which means nothing outside the container can reach it —
+# hence "Cannot GET /" despite the container appearing to run.
+ENV HOST=0.0.0.0
 
 CMD ["node", "server.js"]
