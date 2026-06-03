@@ -8,7 +8,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import tools.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.time.Duration;
 import java.time.OffsetDateTime;
@@ -202,7 +203,11 @@ public class LiveScoreService {
             catch (Exception ex) { log.debug("Couldn't parse kickoff date '{}'", item.fixture().date()); }
         }
         if (item.fixture().venue() != null) entity.setVenue(item.fixture().venue().name());
-        entity.setRawPayload(objectMapper.writeValueAsString(item));
+        try {
+            entity.setRawPayload(objectMapper.writeValueAsString(item));
+        } catch (JsonProcessingException e) {
+            log.warn("Could not serialize raw payload for fixture {}", apiId);
+        }
         entity.setLastSyncedAt(now);
         matchRepo.save(entity);
     }
