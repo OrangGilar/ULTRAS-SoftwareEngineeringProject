@@ -30,7 +30,7 @@ public class CosmeticService {
 
     // Get all cosmetics a user owns
     public List<UserCosmetic> getUserCollection(UUID userId) {
-        return userCosmeticRepo.findByUserId(String.valueOf(userId));
+        return userCosmeticRepo.findByUserId(userId);
     }
 
     // Spend XP to unlock a cosmetic

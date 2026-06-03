@@ -7,7 +7,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 public interface UserCosmeticRepository extends JpaRepository<UserCosmetic, UUID> {
-    List<UserCosmetic> findByUserId(String userId);
+    List<UserCosmetic> findByUserId(UUID userId);
     Optional<UserCosmetic> findByUserIdAndCosmeticId(UUID userId, UUID cosmeticId);
     boolean existsByUserIdAndCosmeticId(UUID userId, UUID cosmeticId);
 
