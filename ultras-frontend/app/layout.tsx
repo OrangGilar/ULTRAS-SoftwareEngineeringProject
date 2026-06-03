@@ -26,8 +26,8 @@ export default function RootLayout({
       </head>
       <body className="min-h-screen bg-[var(--color-bg)] text-[var(--color-text)] font-sans antialiased">
         <Script
-          src="http://ultras-umami-a61b9f-76-13-19-146.sslip.io/script.js"
-          data-website-id="54948cdb-2438-498b-98f2-959284eaba87"
+          src="https://ultras-umami-9ae0da-76-13-19-146.sslip.io/script.js"
+          data-website-id="35059eef-9679-4e70-9312-7d43e7e5594e"
           strategy="afterInteractive"
         />
         <ClubsProvider><GamesProvider>{children}</GamesProvider></ClubsProvider>
