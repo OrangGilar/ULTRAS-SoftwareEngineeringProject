@@ -12,6 +12,7 @@ export default function RegisterPage() {
   const { register } = useAuth();
 
   const [name, setName] = useState("");
+  const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [agreed, setAgreed] = useState(false);
@@ -24,6 +25,7 @@ export default function RegisterPage() {
 
   const canSubmit =
     name.trim().length > 1 &&
+    /^[a-zA-Z0-9_]{3,24}$/.test(username.trim()) &&
     email.includes("@") &&
     password.length >= 8 &&
     agreed &&
@@ -40,9 +42,9 @@ export default function RegisterPage() {
     try {
       await register({
         displayName: name.trim(),
+        username: username.trim(),
         email: email.trim(),
         password,
-        // username and city left unset — backend derives a username from displayName.
       });
       router.push("/onboarding/quiz");
     } catch (err) {
@@ -51,6 +53,10 @@ export default function RegisterPage() {
           setErrorMsg("Couldn't reach the server. Is the backend running on port 8080?");
         } else if (err.fieldErrors && Object.keys(err.fieldErrors).length > 0) {
           setFieldErrors(err.fieldErrors);
+        } else if (err.status === 409 && err.message.toLowerCase().includes("username")) {
+          setFieldErrors({ username: err.message });
+        } else if (err.status === 409 && err.message.toLowerCase().includes("email")) {
+          setFieldErrors({ email: err.message });
         } else {
           setErrorMsg(err.message);
         }
@@ -98,6 +104,36 @@ export default function RegisterPage() {
           {fieldErrors.displayName && (
             <p className="font-mono-label text-[10px] text-[var(--color-primary)]">
               {fieldErrors.displayName}
+            </p>
+          )}
+        </div>
+
+        <div className="space-y-2">
+          <label
+            htmlFor="register-username"
+            className="font-mono-label text-[10px] text-[var(--color-text-faint)]"
+          >
+            Username
+          </label>
+          <input
+            id="register-username"
+            type="text"
+            autoComplete="username"
+            required
+            minLength={3}
+            maxLength={24}
+            pattern="[A-Za-z0-9_]+"
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
+            placeholder="fan_name"
+            className="w-full border-0 border-b border-[var(--color-line-strong)] bg-transparent px-0 py-2 text-base text-[var(--color-text)] placeholder:text-[var(--color-text-faint)] focus:border-[var(--color-primary)] focus:outline-none"
+          />
+          <p className="font-mono-label text-[10px] text-[var(--color-text-faint)]">
+            3-24 letters, numbers, or underscores.
+          </p>
+          {fieldErrors.username && (
+            <p className="font-mono-label text-[10px] text-[var(--color-primary)]">
+              {fieldErrors.username}
             </p>
           )}
         </div>

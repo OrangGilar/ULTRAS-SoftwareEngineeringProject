@@ -4,10 +4,12 @@ import { useCallback, useSyncExternalStore } from "react";
 import {
   getStoredAuth,
   setStoredAuth,
+  forgotPassword as apiForgotPassword,
   login as apiLogin,
   register as apiRegister,
   logout as apiLogout,
   type AuthResponse,
+  type ForgotPasswordPayload,
   type LoginPayload,
   type RegisterPayload,
 } from "@/lib/api";
@@ -89,6 +91,10 @@ export function useAuth() {
     return res;
   }, []);
 
+  const forgotPassword = useCallback(async (payload: ForgotPasswordPayload) => {
+    await apiForgotPassword(payload);
+  }, []);
+
   const logout = useCallback(() => {
     apiLogout();
     invalidate();
@@ -106,6 +112,7 @@ export function useAuth() {
     isAuthenticated: !!auth,
     login,
     register,
+    forgotPassword,
     logout,
     setAuth,
   };

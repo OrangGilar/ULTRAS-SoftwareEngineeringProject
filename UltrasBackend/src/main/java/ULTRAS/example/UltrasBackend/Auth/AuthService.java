@@ -21,7 +21,9 @@ public class AuthService {
 
     @Transactional
     public AuthResponse register(RegisterRequest req) {
-        if (userRepo.existsByEmail(req.email())) {
+        String email = normalizeEmail(req.email());
+
+        if (userRepo.existsByEmailIgnoreCase(email)) {
             throw new ApiException(HttpStatus.CONFLICT, "Email already registered");
         }
 
@@ -29,14 +31,14 @@ public class AuthService {
         // a numeric suffix until it's unique. Cheap, predictable, no extra round trip.
         String username = (req.username() == null || req.username().isBlank())
                 ? deriveUniqueUsername(req.displayName())
-                : req.username();
+                : normalizeUsername(req.username());
 
-        if (userRepo.existsByUsername(username)) {
+        if (userRepo.existsByUsernameIgnoreCase(username)) {
             throw new ApiException(HttpStatus.CONFLICT, "Username already taken");
         }
 
         User user = User.builder()
-                .email(req.email())
+                .email(email)
                 .username(username)
                 .password(passwordEncoder.encode(req.password()))
                 .city(req.city())
@@ -49,7 +51,7 @@ public class AuthService {
     }
 
     public AuthResponse login(LoginRequest req) {
-        User user = userRepo.findByEmail(req.email())
+        User user = userRepo.findByEmailIgnoreCase(normalizeEmail(req.email()))
                 .orElseThrow(() -> new ApiException(HttpStatus.UNAUTHORIZED, "Invalid email or password"));
 
         if (!passwordEncoder.matches(req.password(), user.getPassword())) {
@@ -57,6 +59,15 @@ public class AuthService {
         }
 
         return buildResponse(user);
+    }
+
+    @Transactional
+    public void forgotPassword(ForgotPasswordRequest req) {
+        User user = userRepo.findByEmailIgnoreCase(normalizeEmail(req.email()))
+                .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "No account found for that email"));
+
+        user.setPassword(passwordEncoder.encode(req.newPassword()));
+        userRepo.save(user);
     }
 
     private AuthResponse buildResponse(User user) {
@@ -78,12 +89,20 @@ public class AuthService {
         if (base.length() > 24) base = base.substring(0, 24);
 
         // Try the base first, then base + a few random suffixes.
-        if (!userRepo.existsByUsername(base)) return base;
+        if (!userRepo.existsByUsernameIgnoreCase(base)) return base;
         for (int i = 0; i < 8; i++) {
             String candidate = base + (1000 + (int)(Math.random() * 9000));
-            if (!userRepo.existsByUsername(candidate)) return candidate;
+            if (!userRepo.existsByUsernameIgnoreCase(candidate)) return candidate;
         }
         // Extremely unlikely fallback.
         return base + System.currentTimeMillis();
+    }
+
+    private String normalizeEmail(String email) {
+        return email.trim().toLowerCase(Locale.ROOT);
+    }
+
+    private String normalizeUsername(String username) {
+        return username.trim().toLowerCase(Locale.ROOT);
     }
 }

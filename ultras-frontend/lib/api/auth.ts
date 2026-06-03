@@ -27,6 +27,11 @@ export type LoginPayload = {
   password: string;
 };
 
+export type ForgotPasswordPayload = {
+  email: string;
+  newPassword: string;
+};
+
 /**
  * POST /api/auth/register
  * On success, persists the JWT so subsequent requests authenticate automatically.
@@ -43,6 +48,11 @@ export async function login(payload: LoginPayload): Promise<AuthResponse> {
   const { data } = await api.post<AuthResponse>("/api/auth/login", payload);
   setStoredAuth(data);
   return data;
+}
+
+/** POST /api/auth/forgot-password - updates the password for the matching email. */
+export async function forgotPassword(payload: ForgotPasswordPayload): Promise<void> {
+  await api.post<void>("/api/auth/forgot-password", payload);
 }
 
 /** Drops the locally-cached JWT. Server is stateless so no API call is needed. */
