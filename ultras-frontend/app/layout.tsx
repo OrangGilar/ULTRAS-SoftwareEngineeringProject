@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next";
+import Script from "next/script";
 import "./globals.css";
 import { ClubsProvider } from "@/components/providers/ClubsProvider";
 import { GamesProvider } from "@/components/providers/GamesProvider";
@@ -24,6 +25,11 @@ export default function RootLayout({
         <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Playfair+Display:ital@1&display=swap" rel="stylesheet" />
       </head>
       <body className="min-h-screen bg-[var(--color-bg)] text-[var(--color-text)] font-sans antialiased">
+        <Script
+          src="http://ultras-umami-a61b9f-76-13-19-146.sslip.io/script.js"
+          data-website-id="54948cdb-2438-498b-98f2-959284eaba87"
+          strategy="afterInteractive"
+        />
         <ClubsProvider><GamesProvider>{children}</GamesProvider></ClubsProvider>
       </body>
     </html>
